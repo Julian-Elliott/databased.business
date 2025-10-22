@@ -1,60 +1,23 @@
-# Astro Starter Kit: Blog
+# databased.business
 
-![Astro Template Preview](https://github.com/withastro/astro/assets/2244813/ff10799f-a816-4703-b967-c78997e8323d)
+_databased.business_ is my home on the web for exploring "data democratisation", the core theme of my MSc dissertation. Rather than repeating dissertation chapters, this site serves as a parallel resource where I translate academic learning into original essays, lab notes, and experiments for a wider community. Expect reflections that bridge theory with pragmatic approaches to building data-informed organisations while respecting the integrity of the submitted research.
 
-<!-- dash-content-start -->
+This site is built with [Astro](https://astro.build/) and deployed on [Cloudflare](https://www.cloudflare.com/) Workers and Pages to keep delivery fast and resilient. Along the way I rely on TypeScript, modern CSS tooling, and a small collection of data visualisation libraries to prototype concepts quickly.
 
-Create a blog with Astro and deploy it on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
+## Current Goals
 
-Features:
+- Publish foundational essays that interpret the dissertation research questions without duplicating the formal submission.
+- Document the technical stack, deployment workflow, and repeatable project structure.
+- Share experiments that put data storytelling patterns into practice.
+- Invite feedback that sharpens the narrative around equitable access to data.
 
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and OpenGraph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
+## Planned Features and Content Areas
 
-<!-- dash-content-end -->
+- A living literature review summarising key authors, frameworks, and case studies on data democratisation.
+- Hands-on tutorials showing how to build lightweight data products with open-source tools.
+- Interactive prototypes that blend dashboards, notebooks, and narrative to illustrate end-to-end insights.
+- Reflections on ethics, governance, and cultural change required to make data accessible.
 
-## Getting Started
+## Follow Along and Contribute
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/misty-fog-7637
-```
-
-A live public deployment of this template is available at [https://misty-fog-7637.templates.workers.dev](https://misty-fog-7637.templates.workers.dev)
-
-## 🚀 Project Structure
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-| `npm run deploy`          | Deploy your production site to Cloudflare        |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+This repository tracks the full Astro project, so you can clone it, run `npm install`, and use `npm run dev` to explore the site locally. Issues and discussions are welcome, whether you want to point me towards new research, share real-world stories, or suggest improvements to the build. Feel free to open a pull request, or reach out via [email](mailto:Julian@databased.business) and [Bluesky](https://bsky.app/profile/databased.business) to stay in touch as the project evolves.
