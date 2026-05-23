@@ -26,3 +26,9 @@ pnpm-debug.log*
 # wrangler files
 .wrangler
 .dev.vars
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
