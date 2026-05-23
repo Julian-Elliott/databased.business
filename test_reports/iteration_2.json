@@ -1,0 +1,77 @@
+{
+  "summary": "Iteration 2 frontend-only testing of databased.business (Astro 5). All UI/structural requirements PASS: new field-notes feed at /, 4-surface nav with correct active highlighting, /blog 301→/ redirect, /shop with full product UI (image, name, £28 price, SKU chip, 6 size radios with M default, buy button, 3-row shipping table), cancel-from-Stripe state, demo-mode 'paid' fallback for valid cs_test_* IDs, models/code/blog/RSS all still working (6 cards, 15 repos, 4 RSS items). Buy button locally redirects to real checkout.stripe.com URL. All API endpoint behaviour verified via localhost:3000 (Astro dev): valid checkout 200, bogus SKU 400, bad size 400, missing origin 400, valid cs_test_* status returns demo-mode 200, truly bogus session_id returns 502. CRITICAL ENV ISSUE: /api/* via the public preview URL returns 502 because K8s ingress routes /api/* to port 8001 (FastAPI backend, which is supervisor FATAL); Astro serves /api/* on port 3000. End-user buy flow therefore fails on the deployed preview (works locally; will work in production on Cloudflare Workers).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Shop page (/shop/)",
+        "issue": "44px horizontal overflow at 375px mobile viewport. Product grid / SKU chip / shipping table likely culprit. Other viewports (768, 1440) and other pages (/, /models, /code) clean.",
+        "selector": "main.wrap or .product-info",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Buy → /api/checkout via public preview URL",
+        "issue": "POST /api/checkout via the public preview URL returns 502 ('The preview environment is not responding'). The K8s ingress routes /api/* to port 8001 where FastAPI is supervisor=FATAL; Astro hosts the API on port 3000. Locally curl/Playwright→localhost:3000 the endpoint returns real Stripe cs_test_* + checkout.stripe.com URL (verified). Production on Cloudflare Workers will work. UI fallback message rendered in browser: \"Couldn't start checkout: Unexpected token 'T', \\\"The previe\\\"... is not valid JSON\".",
+        "affected_selectors": ["[data-testid='buy-button']", "[data-testid='status']", "/api/checkout", "/api/checkout-status/*"]
+      },
+      {
+        "flow": "Demo-mode success polling via public preview URL",
+        "issue": "GET /api/checkout-status/cs_test_* via public URL also returns 502 (same ingress mismatch). The polling loop falls into the retry/warn state ('Could not reach the status endpoint. Retrying…'), so the demo 'Payment confirmed [DEMO MODE]' UX cannot be exercised through the public URL. Verified working on http://localhost:3000 (shows '✓ Payment confirmed … [DEMO MODE] …', buy button disabled and shows '✓ purchased').",
+        "affected_selectors": ["[data-testid='status']", "[data-testid='buy-button']"]
+      }
+    ],
+    "design_issues": [
+      {"screen": "/shop/ at 375px", "issues": ["44px horizontal scroll overflow on mobile — likely the SKU chip, price, or shipping table is wider than the viewport. Add overflow-x:hidden on main or wrap long mono strings."]}
+    ]
+  },
+  "passed_checks": [
+    "Root / serves field-notes feed with all required testids (home-main, page-head, filters, post-rows)",
+    "Hero 'transparent / opaque.' title present",
+    "/blog → 301 to /",
+    "Nav shows exactly 4 surfaces (01 field notes, 02 renders, 03 shipped code, 04 shop) + RSS link, 6 anchors total",
+    "Active state highlights current surface (04 shop visible underlined when on /shop)",
+    "/shop renders: shop-index, product-image, product-name='transparent / opaque — t-shirt', product-price contains '£28', product-sku='tee-transparent-opaque', all 6 size radios size-XS..size-XXL, buy-button, shipping-table with 3 rows",
+    "Default size M is :checked",
+    "Unchecking M then clicking buy shows 'Pick a size first.' status",
+    "[localhost] POST /api/checkout {sku,size:M,origin} → 200, returns {url:checkout.stripe.com..., session_id:cs_test_...}",
+    "[localhost] POST /api/checkout bogus SKU → 400 {error:'Unknown SKU: bogus'}",
+    "[localhost] POST /api/checkout size XXXL → 400 {error contains 'Invalid size'}",
+    "[localhost] POST /api/checkout missing origin → 400 {error:'Missing or invalid `origin`.'}",
+    "[localhost] GET /api/checkout-status/cs_test_<valid> → 200 {payment_status:'paid', demo_mode:true, demo_note:'...'}",
+    "[localhost] GET /api/checkout-status/bogus → 502 {error:'No such checkout.session: bogus'} (correct non-demo failure)",
+    "[localhost] Playwright click buy-button → browser navigates to real https://checkout.stripe.com/c/pay/cs_test_... URL",
+    "[localhost] /shop/?session_id=cs_test_<valid> → status shows '✓ Payment confirmed … — [DEMO MODE] preview env can't verify, but Stripe processed the test card.'; buy-button disabled with label '✓ purchased'",
+    "/shop/?status=cancelled → status shows 'Checkout cancelled — your card was not charged.'",
+    "/models/ → 200, 6 model cards",
+    "/code/ → 200, 15 live GitHub repo cards",
+    "/blog/transparent-vs-opaque-credit-default/ → 200 (and other 3 posts implied via RSS)",
+    "/rss.xml → 200, valid XML, 4 items",
+    "Mobile hero overflow from iteration 1 (375px on /) is FIXED — 0px overflow now",
+    "No horizontal overflow at 1440 or 768 on any of /, /shop, /models, /code; 375 clean on /, /models, /code"
+  ],
+  "test_report_links": ["/app/test_reports/iteration_2.json"],
+  "action_items": [
+    "[BLOCKER for public preview UX] Resolve /api/* ingress mismatch: K8s ingress routes /api/* to port 8001 (FastAPI; currently supervisor FATAL) but the Astro app serves /api/checkout and /api/checkout-status/[id] on port 3000. Two viable fixes: (a) run `astro build && wrangler/preview` so Astro emits a Node/Workers adapter that listens on 8001 too, OR (b) add a thin FastAPI proxy on 8001 that forwards /api/* to http://localhost:3000/api/*, OR (c) repoint ingress /api/* → port 3000 for this preview env. Production on Cloudflare Workers will not have this issue.",
+    "Fix /shop 44px horizontal overflow at 375px — inspect .product-info, .product-price.amount (32px display font), .product-sku chip, and .ship table; add overflow-x:hidden on main.wrap or reduce paddings / wrap on small viewports.",
+    "Optional polish: in [data-testid='status'] the demo-mode line wraps very long. Consider line-clamping or making the [DEMO MODE] suffix a second line via <br>."
+  ],
+  "critical_code_review_comments": [
+    "/app/src/pages/api/checkout.ts looks correct (returns 200/400 with proper error shapes). /app/src/pages/api/checkout-status/[session_id].ts correctly returns demo-mode synthetic 200 only when the proxy returns 404 AND the session id matches /^cs_test_[A-Za-z0-9]{20,}$/ — truly bogus IDs still 502. Good.",
+    "/app/src/lib/stripe.ts: stripeFetch raises StripeError on non-OK; retrieveCheckoutSession bubbles up to the route handler which catches and decides demo-mode vs 502. Clean separation.",
+    "Buy-button click handler in /app/src/pages/shop/index.astro disables the button on click but only re-enables on .catch — if the redirect to checkout.stripe.com fails after the response is parsed (e.g. window.location.href set), the button stays disabled. Minor.",
+    "Status polling has max=6 attempts × 1800ms = ~10s before showing the timeout message; reasonable.",
+    "/app/src/pages/blog/index.astro 301 is good; consider adding it for /blog (no trailing slash) too — currently works via Astro's trailing slash default but worth a smoke test in production.",
+    "No data-testid on the inputs themselves works because the `<label>` wrapping the radio has the testid via the input; the spec asked for size-XS..size-XXL on the input — Playwright is_checked() worked, so OK.",
+    "Demo-mode regex {20,} char class is correct for cs_test_* IDs; consider also accepting cs_live_* if real keys are ever used."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (no separate backend — Astro server endpoints, all 6 API behaviours pass via localhost)", "frontend": "~94% — every UI/UX requirement met; the only failures are: (i) /shop 375px overflow, (ii) /api/* unreachable via public preview URL (infra)"},
+  "test_credentials": "STRIPE_API_KEY=sk_test_emergent (already in /app/.env, /app/.dev.vars)",
+  "seed_data_creation": "none",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Astro SSG at /app (not /app/frontend). Supervisor: only `frontend` runs (Astro dev on :3000); `backend` is FATAL (FastAPI not used). Public preview URL: https://2e03f96f-3c00-4ef2-babf-b5437f079390.preview.emergentagent.com. IMPORTANT: K8s ingress routes /api/* to port 8001 → 502 in this env. To test /api/checkout and /api/checkout-status, hit http://localhost:3000 directly. UI tests on the public URL still work for everything that isn't /api/*. Testids confirmed: home-main, page-head, filters, post-rows, shop-index, product-image, product-name, product-price, product-sku, size-XS..XXL, buy-button, status, shipping-table, meta-block. Default selected size = M (3rd radio, i===2). Cancel route: /shop/?status=cancelled. Success simulation route: /shop/?session_id=cs_test_<>=20-char-alnum>.",
+  "rca_of_the_issue": "(1) /api 502 on public URL: K8s ingress rule '/api/* → :8001' (FastAPI), but Astro hosts the API endpoints on :3000. Backend supervisor program is FATAL. Locally curl localhost:3000/api/checkout works perfectly. Fix in environment, not in code. (2) /shop 375px overflow: introduced this iteration with the new product page. Most likely culprit is the 32px .amount span or the 4-column .ship table being narrower than 375px on small screens — add @media (max-width: 480px) rules or `main.wrap { overflow-x: hidden }`."
+}

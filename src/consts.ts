@@ -16,9 +16,10 @@ export const AUTHOR = {
 };
 
 // Section taxonomy — every nav surface in the site references this.
+// The root path `/` IS the field notes feed; there is no separate index.
 export const SECTIONS = [
-  { idx: "00", slug: "/", label: "index", title: "Index" },
-  { idx: "01", slug: "/blog", label: "field notes", title: "Field notes" },
-  { idx: "02", slug: "/models", label: "renders", title: "3D renders" },
-  { idx: "03", slug: "/code", label: "shipped code", title: "Shipped code" },
+  { idx: "01", slug: "/",       label: "field notes",  title: "Field notes" },
+  { idx: "02", slug: "/models", label: "renders",      title: "3D renders"  },
+  { idx: "03", slug: "/code",   label: "shipped code", title: "Shipped code" },
+  { idx: "04", slug: "/shop",   label: "shop",         title: "Shop"        },
 ] as const;

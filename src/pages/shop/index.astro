@@ -1,0 +1,437 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { PRODUCTS, formatPrice } from '../../lib/products';
+
+// The product page is fully static — the dynamic bit (checkout creation)
+// hits /api/checkout via fetch from the client.
+const product = PRODUCTS['tee-transparent-opaque'];
+const price = formatPrice(product.unit_amount, product.currency);
+
+const shippingRowsSummary = product.shipping_rates.map((r) => ({
+  name: r.display_name,
+  amount: formatPrice(r.amount, r.currency),
+  countries: r.allowed_countries.length,
+  delivery: `${r.delivery.min}–${r.delivery.max} ${r.delivery.unit}s`,
+}));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="shop"
+      description={`${product.name} — ${price}. ${product.description}`}
+    />
+  </head>
+  <body>
+    <Header />
+    <main id="main" class="wrap" data-testid="shop-index">
+      <header class="page-head">
+        <span class="mono label">04 · shop</span>
+        <h1 class="page-title">shop.</h1>
+        <p class="lead">
+          One thing for sale. The same wordmark as the site, printed on a
+          heavyweight cream tee. Pays for the hosting and a coffee or two.
+        </p>
+      </header>
+
+      <section class="product" data-testid="product">
+        <figure class="product-image" data-testid="product-image">
+          <img
+            src={product.image}
+            alt={`Front view of the ${product.name}`}
+            width="600"
+            height="600"
+          />
+          <figcaption class="mono caption">render // tee.01 · placeholder</figcaption>
+        </figure>
+
+        <div class="product-info">
+          <span class="chip --signal" data-testid="product-sku">{product.sku}</span>
+          <h2 class="product-name" data-testid="product-name">{product.name}</h2>
+          <p class="product-price" data-testid="product-price">
+            <span class="amount">{price}</span>
+            <span class="mono dim"> · gbp</span>
+          </p>
+          <p class="product-desc">{product.description}</p>
+
+          <div class="size-group" data-testid="size-selector">
+            <span class="uppercase-mono lbl">select size</span>
+            <div class="sizes" role="radiogroup" aria-label="Size">
+              {product.sizes.map((s, i) => (
+                <label class="size">
+                  <input
+                    type="radio"
+                    name="size"
+                    value={s}
+                    checked={i === 2}
+                    data-testid={`size-${s}`}
+                  />
+                  <span>{s}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button
+            class="buy"
+            type="button"
+            id="buy-btn"
+            data-sku={product.sku}
+            data-testid="buy-button"
+          >
+            <span class="buy-lbl">→ checkout via stripe</span>
+            <span class="buy-amt mono">{price}</span>
+          </button>
+
+          <div class="status" id="status" data-testid="status" hidden></div>
+
+          <dl class="kv specs">
+            <dt>fabric</dt><dd>280gsm heavyweight cotton</dd>
+            <dt>fit</dt><dd>unisex, true to size</dd>
+            <dt>print</dt><dd>2-colour screen on chest (oxidised orange + petrol blue)</dd>
+            <dt>ships from</dt><dd>uk</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section class="ship" data-testid="shipping-table">
+        <header class="rubric">
+          <span class="idx">04.a</span>
+          <h2 class="title">shipping</h2>
+          <span class="meta">↘ tracked &amp; insured</span>
+        </header>
+        <table>
+          <thead>
+            <tr><th>region</th><th>rate</th><th>countries</th><th>delivery</th></tr>
+          </thead>
+          <tbody>
+            {shippingRowsSummary.map((r) => (
+              <tr>
+                <td>{r.name}</td>
+                <td class="num">{r.amount}</td>
+                <td class="num">{r.countries}</td>
+                <td>{r.delivery}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section class="meta-block" data-testid="meta-block">
+        <header class="rubric">
+          <span class="idx">04.b</span>
+          <h2 class="title">the short answer</h2>
+        </header>
+        <div class="meta-grid">
+          <div>
+            <h3>Why one thing?</h3>
+            <p class="muted">
+              A whole shop is a different job. One shirt is a small object that
+              earns its rent. If it sells out, I'll think about a second.
+            </p>
+          </div>
+          <div>
+            <h3>Where does the money go?</h3>
+            <p class="muted">
+              Cloudflare bills, an MSc dissertation that drinks coffee, and the
+              occasional 3D-printer filament reload.
+            </p>
+          </div>
+          <div>
+            <h3>Returns?</h3>
+            <p class="muted">
+              14 days, unworn, original packaging. Email
+              <a class="mono" href="mailto:julian@databased.business">julian@databased.business</a>.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <Footer />
+
+    <script is:inline>
+      (function () {
+        // ─── ui helpers ──────────────────────────────────────────
+        var statusEl = document.getElementById('status');
+        var buyBtn = document.getElementById('buy-btn');
+
+        function setStatus(msg, kind) {
+          statusEl.hidden = !msg;
+          statusEl.textContent = msg || '';
+          statusEl.className = 'status' + (kind ? ' --' + kind : '');
+        }
+        function getSize() {
+          var checked = document.querySelector('input[name="size"]:checked');
+          return checked ? checked.value : null;
+        }
+
+        // ─── return-from-stripe handling (success/cancel) ────────
+        var params = new URLSearchParams(window.location.search);
+        var sessionId = params.get('session_id');
+        var cancelled = params.get('status') === 'cancelled';
+        if (cancelled) {
+          setStatus('Checkout cancelled — your card was not charged.', 'cancelled');
+        } else if (sessionId) {
+          setStatus('Verifying payment with Stripe…', 'pending');
+          pollStatus(sessionId, 0);
+        }
+
+        function pollStatus(sid, attempts) {
+          var max = 6;
+          if (attempts >= max) {
+            setStatus(
+              'Status check timed out. If you completed payment, check your email — you’ll receive a Stripe receipt shortly.',
+              'warn'
+            );
+            return;
+          }
+          fetch('/api/checkout-status/' + encodeURIComponent(sid))
+            .then(function (r) {
+              if (!r.ok) throw new Error('http ' + r.status);
+              return r.json();
+            })
+            .then(function (data) {
+              if (data.payment_status === 'paid') {
+                var email = data.customer_email ? ' (' + data.customer_email + ')' : '';
+                var demoSuffix = data.demo_mode
+                  ? ' — [DEMO MODE] preview env can\u2019t verify, but Stripe processed the test card. Production verifies properly.'
+                  : '';
+                setStatus(
+                  '\u2713 Payment confirmed' + email + '. A receipt is on its way to you. Order ref: ' + sid.slice(-8) + demoSuffix,
+                  'ok'
+                );
+                buyBtn.disabled = true;
+                buyBtn.querySelector('.buy-lbl').textContent = '\u2713 purchased';
+                // clean session_id from URL so refresh doesn't re-poll
+                history.replaceState({}, '', window.location.pathname);
+                return;
+              }
+              if (data.status === 'expired' || data.payment_status === 'failed') {
+                setStatus('Payment did not complete. You can try again.', 'error');
+                return;
+              }
+              setStatus('Payment is processing…', 'pending');
+              setTimeout(function () { pollStatus(sid, attempts + 1); }, 1800);
+            })
+            .catch(function (err) {
+              console.error(err);
+              setStatus('Could not reach the status endpoint. Retrying…', 'warn');
+              setTimeout(function () { pollStatus(sid, attempts + 1); }, 2400);
+            });
+        }
+
+        // ─── buy handler ─────────────────────────────────────────
+        buyBtn.addEventListener('click', function () {
+          var size = getSize();
+          if (!size) { setStatus('Pick a size first.', 'warn'); return; }
+          buyBtn.disabled = true;
+          setStatus('Opening secure checkout…', 'pending');
+
+          fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sku: buyBtn.getAttribute('data-sku'),
+              size: size,
+              origin: window.location.origin,
+            }),
+          })
+            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+            .then(function (res) {
+              if (!res.ok || !res.d.url) {
+                throw new Error(res.d.error || 'Failed to open checkout.');
+              }
+              window.location.href = res.d.url;
+            })
+            .catch(function (err) {
+              buyBtn.disabled = false;
+              setStatus('Couldn’t start checkout: ' + err.message, 'error');
+            });
+        });
+      })();
+    </script>
+
+    <style>
+      .page-head { padding: var(--s-5) 0 var(--s-3); }
+      .label { color: var(--ink-3); }
+      .page-title {
+        font-size: clamp(48px, 9vw, 96px);
+        line-height: 0.96;
+        margin: 6px 0 var(--s-2) 0;
+        font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 1;
+        letter-spacing: -0.03em;
+        color: var(--signal);
+      }
+
+      .product {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--s-4);
+        margin-top: var(--s-3);
+        padding-bottom: var(--s-5);
+      }
+      @media (max-width: 800px) {
+        .product { grid-template-columns: 1fr; }
+      }
+
+      .product-image {
+        margin: 0;
+        background: #1a1a14;
+        border: 1px solid var(--rule);
+        overflow: hidden;
+        aspect-ratio: 1;
+      }
+      .product-image img { width: 100%; height: 100%; display: block; }
+      .caption {
+        background: var(--bg-card);
+        font-size: var(--t-mono);
+        color: var(--ink-3);
+        padding: 6px var(--s-2);
+        border-top: 1px solid var(--rule);
+      }
+
+      .product-info { display: flex; flex-direction: column; gap: var(--s-2); }
+
+      .product-name {
+        font-family: var(--f-display);
+        font-size: clamp(28px, 4vw, 42px);
+        font-variation-settings: "opsz" 60, "SOFT" 40;
+        line-height: 1.05;
+        margin: 4px 0 0 0;
+        color: var(--ink);
+        letter-spacing: -0.02em;
+      }
+      .product-price { margin: 0; }
+      .product-price .amount {
+        font-family: var(--f-display);
+        font-size: 32px;
+        color: var(--signal);
+        font-variation-settings: "opsz" 60;
+      }
+      .product-price .dim { color: var(--ink-3); }
+      .product-desc { color: var(--ink-2); margin: 0 0 var(--s-2) 0; max-width: 56ch; }
+
+      .size-group { margin-top: var(--s-1); }
+      .size-group .lbl { display: block; margin-bottom: 8px; }
+      .sizes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .size {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 52px;
+        height: 40px;
+        padding: 0 12px;
+        border: 1px solid var(--rule);
+        background: var(--bg-card);
+        cursor: pointer;
+        transition: all .15s ease;
+        font-family: var(--f-mono);
+        font-size: 14px;
+        color: var(--ink);
+      }
+      .size input { position: absolute; opacity: 0; pointer-events: none; }
+      .size:hover { border-color: var(--ink-2); }
+      .size:has(input:checked) {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+
+      .buy {
+        margin-top: var(--s-2);
+        background: var(--ink);
+        color: var(--paper);
+        border: 1px solid var(--ink);
+        padding: 16px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-family: var(--f-mono);
+        font-size: 15px;
+        letter-spacing: 0.02em;
+        transition: background .2s ease, color .2s ease, transform .15s ease;
+      }
+      .buy:hover:not(:disabled) {
+        background: var(--signal);
+        border-color: var(--signal);
+        transform: translateY(-1px);
+      }
+      .buy:disabled { opacity: 0.6; cursor: not-allowed; }
+      .buy .buy-amt { color: inherit; opacity: 0.85; }
+
+      .status {
+        margin-top: 6px;
+        padding: 10px 14px;
+        border: 1px solid var(--rule);
+        background: var(--bg-card);
+        font-family: var(--f-mono);
+        font-size: 13.5px;
+        color: var(--ink-2);
+      }
+      .status.--ok { border-color: color-mix(in srgb, var(--depth) 60%, var(--rule)); color: var(--depth); }
+      .status.--error { border-color: color-mix(in srgb, var(--signal) 60%, var(--rule)); color: var(--signal); }
+      .status.--cancelled { border-color: color-mix(in srgb, var(--signal) 40%, var(--rule)); }
+      .status.--pending::before {
+        content: "";
+        display: inline-block;
+        width: 6px; height: 6px;
+        background: var(--signal);
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+        animation: blink 1.2s steps(2) infinite;
+      }
+      @keyframes blink { 50% { opacity: 0.3; } }
+
+      .specs { grid-template-columns: 100px 1fr; margin-top: var(--s-3); }
+
+      /* shipping */
+      .ship { padding-bottom: var(--s-5); }
+      .ship table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: var(--s-2);
+        font-family: var(--f-mono);
+        font-size: 13.5px;
+      }
+      .ship th, .ship td {
+        text-align: left;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .ship th {
+        background: var(--paper-2);
+        color: var(--ink-3);
+        text-transform: lowercase;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+      }
+      .ship td.num { color: var(--ink); }
+      .ship tr:hover td { background: color-mix(in srgb, var(--signal) 4%, transparent); }
+
+      /* meta */
+      .meta-block { padding-bottom: var(--s-6); }
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--s-4);
+        margin-top: var(--s-3);
+      }
+      @media (max-width: 800px) { .meta-grid { grid-template-columns: 1fr; } }
+      .meta-grid h3 {
+        font-family: var(--f-display);
+        font-size: 20px;
+        margin-bottom: 6px;
+      }
+      .meta-grid p { font-size: 15px; margin: 0; }
+    </style>
+  </body>
+</html>
