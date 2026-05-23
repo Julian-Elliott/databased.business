@@ -126,17 +126,17 @@ const todayIso = new Date().toISOString().slice(0, 10);
       <section class="wrap" data-testid="manifesto-section">
         <SectionRubric idx="04" title="three axes" meta="↘ working principles" />
         <div class="axes">
-          <article class="axis">
+          <article class="axis" data-testid="axis-x">
             <span class="mono axis-num">x</span>
             <h3>Show the working.</h3>
             <p class="muted">Every claim ships with its data, code, and decisions. If the receipts won't load, the claim doesn't either.</p>
           </article>
-          <article class="axis">
+          <article class="axis" data-testid="axis-y">
             <span class="mono axis-num">y</span>
             <h3>Prefer the model you can defend.</h3>
             <p class="muted">Interpretability is not a vibe — it's a regulatory artefact. Opaque models earn their place by lift you can measure.</p>
           </article>
-          <article class="axis">
+          <article class="axis" data-testid="axis-z">
             <span class="mono axis-num">z</span>
             <h3>Plain English is the deliverable.</h3>
             <p class="muted">A model nobody can summarise is a model nobody owns. Data democracy starts with a single intelligible sentence.</p>
@@ -175,13 +175,33 @@ const todayIso = new Date().toISOString().slice(0, 10);
         font-weight: 400;
         letter-spacing: -0.04em;
         margin: 0 0 var(--s-3) 0;
-        font-size: clamp(56px, 12vw, 144px);
+        font-size: clamp(48px, 12vw, 144px);
         line-height: 0.92;
       }
       .hero-title .slash { color: var(--ink-3); font-style: italic; }
       .hero-title .period { color: var(--signal); }
       .hero-title .depth { color: var(--depth); }
       .hero-title .signal { color: var(--signal); font-style: italic; }
+
+      @media (max-width: 560px) {
+        .hero-title {
+          font-size: clamp(40px, 16vw, 84px);
+          letter-spacing: -0.045em;
+        }
+        /* Stack the two halves vertically so neither overflows */
+        .hero-title .depth,
+        .hero-title .signal { display: inline-block; }
+        .hero-title .slash {
+          display: block;
+          height: 0;
+          overflow: hidden;
+        }
+        .hero-title .signal::before {
+          content: "/ ";
+          color: var(--ink-3);
+          font-style: italic;
+        }
+      }
 
       .hero-lead {
         max-width: 56ch;

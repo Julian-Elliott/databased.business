@@ -1,23 +1,104 @@
 # databased.business
 
-_databased.business_ is my home on the web for exploring "data democratisation", the core theme of my MSc dissertation. Rather than repeating dissertation chapters, this site serves as a parallel resource where I translate academic learning into original essays, lab notes, and experiments for a wider community. Expect reflections that bridge theory with pragmatic approaches to building data-informed organisations while respecting the integrity of the submitted research.
+> Field notes on data, models, and what we can defend in plain English.
 
-This site is built with [Astro](https://astro.build/) and deployed on [Cloudflare](https://www.cloudflare.com/) Workers and Pages to keep delivery fast and resilient. Along the way I rely on TypeScript, modern CSS tooling, and a small collection of data visualisation libraries to prototype concepts quickly.
+Personal site for Julian Elliott — currently reading an MSc in Data Analytics
+at the University of Huddersfield. The site is organised around a single
+animating tension: **transparent** models versus **opaque** ones, and the
+case work in between.
 
-## Current Goals
+Built with [Astro 5](https://astro.build) and deployed to
+[Cloudflare Workers](https://workers.cloudflare.com). A `git push` to `main`
+updates the live site.
 
-- Publish foundational essays that interpret the dissertation research questions without duplicating the formal submission.
-- Document the technical stack, deployment workflow, and repeatable project structure.
-- Share experiments that put data storytelling patterns into practice.
-- Invite feedback that sharpens the narrative around equitable access to data.
+## Surfaces
 
-## Planned Features and Content Areas
+```
+00  index            /                  taxonomy + manifesto
+01  field notes      /blog              long-form essays
+02  renders          /models            3D modelling catalogue
+03  shipped code     /code              live mirror of github.com/Julian-Elliott
+```
 
-- A living literature review summarising key authors, frameworks, and case studies on data democratisation.
-- Hands-on tutorials showing how to build lightweight data products with open-source tools.
-- Interactive prototypes that blend dashboards, notebooks, and narrative to illustrate end-to-end insights.
-- Reflections on ethics, governance, and cultural change required to make data accessible.
+The flagship field note is
+[*Transparent vs Opaque: Predicting Credit Default with Zero-Task Auto-Fuzzy
+and XGBoost*](src/content/blog/transparent-vs-opaque-credit-default.mdx) — a
+side-by-side investigation of an interpretable fuzzy rule system against
+gradient boosted trees, drawn from MSc research.
 
-## Follow Along and Contribute
+## Stack
 
-This repository tracks the full Astro project, so you can clone it, run `npm install`, and use `npm run dev` to explore the site locally. Issues and discussions are welcome, whether you want to point me towards new research, share real-world stories, or suggest improvements to the build. Feel free to open a pull request, or reach out via [email](mailto:Julian@databased.business) and [Bluesky](https://bsky.app/profile/databased.business) to stay in touch as the project evolves.
+- **Framework**: Astro 5 (MDX content collections)
+- **Adapter**: `@astrojs/cloudflare`
+- **Type system**: TypeScript (strict)
+- **Typography**: Fraunces (display) · IBM Plex Sans (body) · IBM Plex Mono
+- **Palette**: cream paper, deep ink, signal orange, petrol blue
+- **Data**: GitHub REST API for `/code` at build time; static MDX for posts
+
+## Local development
+
+```bash
+npm install
+npm run dev    # http://localhost:4321 (or 3000 if started via /app/frontend bridge)
+```
+
+## Build & deploy
+
+```bash
+npm run build           # static prerender → dist/
+npm run deploy          # astro build && wrangler deploy
+```
+
+## Authoring
+
+New field note:
+
+```bash
+$ touch src/content/blog/<slug>.mdx
+```
+
+Frontmatter contract:
+
+```yaml
+---
+title: "..."
+description: "..."
+pubDate: "Jan 18 2026"
+tag: "credit-default"      # optional, drives the filter chips
+readingTime: "14 min"      # optional
+spark: [4, 5, 4, 7, ...]   # optional 12-point sparkline glyph
+draft: false               # optional
+---
+```
+
+Real 3D render images drop into `/public/models/<slug>.{jpg,webp}` and the
+matching entry in `src/data/models.ts` flips `placeholder: false` and gains
+an `image` field. Until then, each card shows an algorithmic wireframe
+derived deterministically from its title.
+
+## Project structure
+
+```
+src/
+  components/   header, footer, post row, repo card, model card, sparkline, rubric
+  content/blog/ MDX field notes
+  data/         models.ts (3D catalogue)
+  layouts/      BlogPost.astro
+  lib/          github.ts (build-time repo fetch + fallback)
+  pages/        index, blog/, models/, code/, rss.xml
+  styles/       global.css (full design system)
+  consts.ts     site title, sections, author profile links
+```
+
+## Principles
+
+- **Show the working.** Every claim ships with its data, code, and decisions.
+- **Prefer the model you can defend.** Interpretability is a regulatory artefact, not a vibe.
+- **Plain English is the deliverable.** A model nobody can summarise is a model nobody owns.
+
+## Contact
+
+- Email: [julian@databased.business](mailto:julian@databased.business)
+- LinkedIn: [julianelliott](https://www.linkedin.com/in/julianelliott)
+- GitHub: [Julian-Elliott](https://github.com/Julian-Elliott)
+- Bluesky: [databased.business](https://bsky.app/profile/databased.business)
