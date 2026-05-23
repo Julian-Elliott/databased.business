@@ -103,21 +103,23 @@ const shippingRowsSummary = product.shipping_rates.map((r) => ({
           <h2 class="title">shipping</h2>
           <span class="meta">↘ tracked &amp; insured</span>
         </header>
-        <table>
-          <thead>
-            <tr><th>region</th><th>rate</th><th>countries</th><th>delivery</th></tr>
-          </thead>
-          <tbody>
-            {shippingRowsSummary.map((r) => (
-              <tr>
-                <td>{r.name}</td>
-                <td class="num">{r.amount}</td>
-                <td class="num">{r.countries}</td>
-                <td>{r.delivery}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div class="ship-scroll">
+          <table>
+            <thead>
+              <tr><th>region</th><th>rate</th><th>countries</th><th>delivery</th></tr>
+            </thead>
+            <tbody>
+              {shippingRowsSummary.map((r) => (
+                <tr>
+                  <td>{r.name}</td>
+                  <td class="num">{r.amount}</td>
+                  <td class="num">{r.countries}</td>
+                  <td>{r.delivery}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section class="meta-block" data-testid="meta-block">
@@ -395,10 +397,15 @@ const shippingRowsSummary = product.shipping_rates.map((r) => ({
 
       /* shipping */
       .ship { padding-bottom: var(--s-5); }
+      .ship-scroll {
+        margin-top: var(--s-2);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
       .ship table {
         width: 100%;
+        min-width: 480px;
         border-collapse: collapse;
-        margin-top: var(--s-2);
         font-family: var(--f-mono);
         font-size: 13.5px;
       }
@@ -416,6 +423,18 @@ const shippingRowsSummary = product.shipping_rates.map((r) => ({
       }
       .ship td.num { color: var(--ink); }
       .ship tr:hover td { background: color-mix(in srgb, var(--signal) 4%, transparent); }
+
+      /* tighten the product page for small phones */
+      @media (max-width: 480px) {
+        .product { gap: var(--s-3); }
+        .product-name { font-size: 26px; }
+        .product-price .amount { font-size: 26px; }
+        .buy { padding: 14px 16px; font-size: 13.5px; flex-wrap: wrap; gap: 6px; }
+        .status { font-size: 12.5px; word-break: break-word; overflow-wrap: anywhere; }
+        .chip { max-width: 100%; word-break: break-all; }
+      }
+      .product-info { min-width: 0; }
+      .status { word-break: break-word; overflow-wrap: anywhere; }
 
       /* meta */
       .meta-block { padding-bottom: var(--s-6); }

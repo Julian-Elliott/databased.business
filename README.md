@@ -84,11 +84,33 @@ src/
   content/blog/ MDX field notes
   data/         models.ts (3D catalogue)
   layouts/      BlogPost.astro
-  lib/          github.ts (build-time repo fetch + fallback)
-  pages/        index, blog/, models/, code/, rss.xml
+  lib/          github.ts, stripe.ts (direct-fetch wrapper), products.ts (SKU catalogue)
+  pages/        index (= field notes), blog/[slug], models/, code/, shop/, api/checkout(.ts), api/checkout-status/[id]
   styles/       global.css (full design system)
-  consts.ts     site title, sections, author profile links
+  consts.ts     site title, sections (4 surfaces), author profile links
 ```
+
+## Shop / Stripe
+
+`/shop` sells a single t-shirt (`tee-transparent-opaque`, £28 GBP).
+Checkout is implemented as Astro server endpoints (`src/pages/api/checkout.ts`
+and `src/pages/api/checkout-status/[session_id].ts`) that compile to
+Cloudflare Worker functions on deploy. No external backend required.
+
+To go live with your own Stripe account:
+
+```bash
+# put your real key into the live Worker
+wrangler secret put STRIPE_API_KEY
+
+# locally:
+cp .dev.vars.example .dev.vars        # then edit
+# or set STRIPE_API_KEY in /app/.env
+```
+
+The product catalogue lives in `src/lib/products.ts` — change the price,
+shipping rates, or SKU there. Prices are server-side only; the client
+never sends an amount.
 
 ## Principles
 

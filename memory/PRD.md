@@ -1,8 +1,8 @@
 # databased.business — PRD
 
-_Last updated: 2026-01-23_
+_Last updated: 2026-01-23 (iter 2)_
 
-## Problem statement (verbatim from user)
+## Problem statement (verbatim from user, original brief)
 
 > I would like to overhaul databased.business into an engaging blog from
 > myself on my data science exploration, that covers my recent investigation
@@ -15,101 +15,147 @@ _Last updated: 2026-01-23_
 > systems oriented thinking. Check how this site is currently deployed as a
 > commit will update the live site.
 
+## Iteration 2 steers (verbatim)
+
+> "I'm not too fussed on the index, I'm also tempted to have t-shirts
+> available for sale on the site"
+
+User-confirmed sub-decisions:
+- **Index**: it just repeats the other tabs. Kill it; serve field notes at `/`.
+- **Shop**: single design, sits as `04 · shop` in the nav, fulfilment TBD.
+
 ## Architecture decisions
 
-- **Preserved the deployment-ready repo shape.** The user's existing
-  GitHub repo (`Julian-Elliott/databased.business`) is an Astro 5 +
-  `@astrojs/cloudflare` site auto-deployed on `git push`. Did **not**
-  restructure into the Emergent default `/app/frontend` React layout. Instead
-  added `/app/frontend/package.json` as a one-line bridge that runs
-  `astro dev` from `/app` on port 3000 to satisfy the read-only supervisor.
-- **Allowed all Vite hosts.** Added `vite.server.allowedHosts: true` to
-  `astro.config.mjs` so the Emergent preview ingress can reach the dev server.
-- **Aesthetic.** INTP-T scientific minimalism per user description:
-  cream paper background, ink type, hairline rules, numbered taxonomy
-  (00/01/02/03), mono lowercase metadata, signal-orange accent, petrol-blue
-  counterweight. Fonts: Fraunces (display, variable), IBM Plex Sans (body),
-  IBM Plex Mono (data labels). Deliberately avoided AI-slop patterns
-  (Inter, purple gradients, centred cards).
-- **GitHub fetch at build time.** `/code` page uses `fetch` against
-  `api.github.com/users/Julian-Elliott/repos` during prerender. Falls back to
-  a static 1-item list if the API is unreachable. Reads `GITHUB_TOKEN` if set.
+- **Preserved the deployment-ready repo shape.** Astro 5 + `@astrojs/cloudflare`,
+  auto-deploys on git push.
+- **Killed the home page.** `/` now serves the field-notes feed. `/blog` is
+  a 301 redirect to `/`. Nav collapsed from 5 to 4 surfaces (01–04).
+- **Shop = Astro server endpoints on Cloudflare Workers.** Diverged from the
+  Emergent FastAPI playbook because this site has no Python backend in prod.
+  All of the playbook's security patterns (server-side prices, dynamic
+  success/cancel URLs, status polling, no client amounts) carried over to
+  TypeScript with no compromises.
+- **Stripe Checkout via direct `fetch`.** Wrote a 200-line wrapper in
+  `src/lib/stripe.ts` instead of the official SDK so we can support both
+  the real `api.stripe.com` (production) and Emergent's
+  `integrations.emergentagent.com/stripe` proxy (preview env) with a
+  single line of conditional routing.
+- **Demo-mode fallback.** The Emergent test proxy CAN create checkout
+  sessions (real `cs_test_*` IDs + real `checkout.stripe.com` URLs) but
+  CANNOT retrieve them — even the official `emergentintegrations` library
+  hits this 404. The `/api/checkout-status` endpoint detects this and
+  returns a synthetic `paid` response with `demo_mode: true` so the UX
+  completes in preview. Real production keys take a different branch
+  and actually verify the session.
+- **Preview-only FastAPI proxy.** Added `/app/backend/server.py` — a 60-line
+  FastAPI proxy on port 8001 that forwards `/api/*` to Astro on port 3000.
+  Only exists to satisfy the K8s ingress rule that routes `/api/*` to 8001.
+  Production on Cloudflare Workers serves `/api/*` natively from the same
+  Worker; this file is irrelevant there.
 
 ## User persona
 
 - **Julian Elliott** — MSc Data Analytics candidate, currently mid-thesis.
 - Visiting engineers/analysts who appreciate density-with-clarity and
   data-democracy framing.
+- Possible new persona: **t-shirt buyers** — readers who want to wear the
+  manifesto.
 
 ## Core requirements (static)
 
 1. **Field-notes blog** with a flagship post comparing zero-task auto-fuzzy
-   vs XGBoost on credit default (transparent vs opaque modelling).
-2. **3D models** section with images (placeholders acceptable for v1).
-3. **Shipped code** section sourced from `github.com/Julian-Elliott`.
+   vs XGBoost on credit default (transparent vs opaque modelling). ✅
+2. **3D models** section with images (placeholders acceptable for v1). ✅
+3. **Shipped code** section sourced from `github.com/Julian-Elliott`. ✅
 4. **Elegant systems-oriented aesthetic** — appeals to engineers / logical
-   analysts.
+   analysts. ✅
+5. **Shop** with at least one item, paid via Stripe. ✅ (iter 2)
 
 ## What's been implemented (2026-01-23)
 
-- Home page (`/`) with hero ("transparent / opaque."), 4-section layout
-  (featured note, three-surfaces taxonomy, recent notes, three-axes manifesto).
-- Blog index (`/blog`) with tag filter chips (all / credit-default / literacy /
-  governance / democratisation).
-- Flagship MDX field note:
-  `src/content/blog/transparent-vs-opaque-credit-default.mdx` — full scaffold
-  with TLDR, methodology for both models, comparison table with placeholder
-  metrics, decision framework, deployment recommendation. Placeholder numbers
-  ready to be filled in from the dissertation.
-- `/models` gallery — 6 placeholder cards with deterministic algorithmic
-  wireframe SVGs derived from each title. Ready to be replaced with real
-  renders by editing `src/data/models.ts`.
-- `/code` page — live mirror of `Julian-Elliott`'s public repos, sorted by
-  last push, language filter chips, decorative activity sparklines, fallback
-  on API failure.
-- Shared layout, header, footer, RSS feed, sitemap (auto-generated).
-- Custom favicon (sparkline mark) and OG image (`og-default.svg`).
-- Cloudflare deploy contract preserved — `npm run deploy` still works.
+### Iter 1
+- Home page with hero, featured, taxonomy, recent, axes (later killed).
+- `/blog` index with tag filter chips.
+- Flagship MDX field note `transparent-vs-opaque-credit-default.mdx`.
+- `/models` with 6 algorithmic wireframe cards.
+- `/code` live mirror of github.com/Julian-Elliott (15 repos).
+- Shared layout, header, footer, RSS, sitemap.
+- Custom favicon and OG image.
+
+### Iter 2
+- **Killed `/`'s old hero/taxonomy/manifesto** — `/` now IS the field-notes
+  feed. Cleaner, no duplicate surfaces.
+- **`/blog` → 301 redirect to `/`** so inbound links still work.
+- **Nav re-numbered**: 01 field notes (/), 02 renders (/models), 03 shipped
+  code (/code), 04 shop (/shop). Brand link still goes to `/`.
+- **`/shop`**: single SKU `tee-transparent-opaque`, £28 GBP, sizes XS–XXL.
+  Product image is an SVG mock until a real render lands. Sticky size
+  selector, ASCII-art-feel buy button, key-value spec table, shipping
+  rate table (3 regions), three "short answer" copy blocks.
+- **Stripe Checkout via Astro server endpoints**:
+  - `POST /api/checkout` — creates session, returns `{url, session_id}`.
+  - `GET /api/checkout-status/[session_id]` — polls status, with demo-mode
+    fallback for the Emergent proxy.
+- **Return-from-Stripe handling**: `?status=cancelled` shows the cancel
+  message; `?session_id=…` polls and shows confirmation. Buy button
+  transitions to "✓ purchased" on success.
+- **Preview-only FastAPI proxy** in `/app/backend/server.py` to route
+  `/api/*` from K8s ingress port 8001 → Astro on 3000.
 
 ## Testing
 
-- All 9 routes return HTTP 200 (`/`, `/blog`, `/blog/*` × 4, `/models`,
-  `/code`, `/rss.xml`).
-- `npx astro build` completes cleanly, prerenders all 7 page routes plus RSS.
-- Testing subagent verified 28/29 frontend checks — single issue (mobile
-  hero overflow at 375px) was fixed by adding a `@media (max-width: 560px)`
-  breakpoint that stacks the two halves of the hero headline.
-- GitHub fetch returned 15 real repos during testing (no rate-limit hit).
+- All routes return HTTP 200: `/`, `/shop`, `/models`, `/code`, `/rss.xml`,
+  `/blog/*` (4 posts). `/blog` returns 301.
+- `npx astro build` prerenders 9 routes and emits 2 server functions
+  (`/api/checkout`, `/api/checkout-status/[session_id]`) + the RSS function.
+- End-to-end buy flow verified via Playwright: click `[data-testid='buy-button']`
+  → server creates session → browser navigates to `checkout.stripe.com/c/pay/cs_test_...`
+  showing the correct product, price, and shipping options.
+- Demo-mode fallback verified: `/shop/?session_id=cs_test_...` shows
+  "✓ Payment confirmed [DEMO MODE]" without a real Stripe retrieve.
+- Cancel flow verified: `/shop/?status=cancelled` shows the cancel banner.
+- Mobile overflow at 375px on /shop was 44px in iter 2; fixed by adding a
+  horizontal-scroll wrapper on the shipping table and `@media (max-width: 480px)`
+  size adjustments.
+
+## Outstanding action items for the user
+
+1. **Commit & push** — `git push` updates the live Cloudflare site.
+2. **Set up a Stripe account** (Julian's own — preview env uses Emergent's
+   test proxy which won't work in prod):
+   - Create the product and obtain a live `sk_live_...` (or test `sk_test_...`).
+   - `wrangler secret put STRIPE_API_KEY` to inject it into the Cloudflare
+     Worker. Optionally also keep a dev `.env` STRIPE_API_KEY for local runs.
+3. **Drop a real t-shirt photo** at `/public/shop/tee-transparent-opaque.svg`
+   (or change the path in `src/lib/products.ts`) — the current SVG mock is
+   a placeholder that signals the design but isn't a sales asset.
+4. **Choose fulfilment**:
+   - Recommended: **Printful POD + Stripe** — upload the design once to
+     Printful, connect Stripe, Printful auto-fulfils on each order. Zero
+     warehouse, lower margin (~£8 cost on £28).
+   - Alt: **DIY shipping** — Stripe in, you handle the post. Highest margin,
+     you become a warehouse.
+5. **Drop your real dissertation metrics** into the credit-default post
+   when they're final.
 
 ## Prioritised backlog
 
-### P1 — Author content
+### P1
+- Real t-shirt render photo.
+- Fulfilment provider chosen and wired (webhook from Stripe → Printful or
+  email-to-Julian on a successful payment).
+- Replace placeholder metrics in `transparent-vs-opaque-credit-default.mdx`.
+- Real 3D renders in `/public/models/`.
 
-- Replace placeholder metrics in the credit-default post with the
-  dissertation's actual AUC / accuracy / F1 / Brier numbers.
-- Drop real 3D renders into `/public/models/` and flip the matching
-  `placeholder: false` in `src/data/models.ts`. Optionally add a
-  `<model-viewer>` web-component if `.glb` files exist.
+### P2
+- Stripe webhook endpoint (`/api/webhook/stripe`) for production-grade
+  fulfilment trigger (currently relies on Stripe dashboard / Printful
+  integration).
+- Per-post right-margin TOC for long posts.
+- Calibration chart placeholder in the credit-default post.
 
-### P2 — Polish
-
-- Add a small per-post table-of-contents in the right margin for long posts
-  (the credit-default post already has 8 sections).
-- Reliability diagram / calibration chart placeholder in the credit-default
-  post — currently described in prose.
-- Optional MathJax/KaTeX wiring if the credit-default post grows formulas.
+### P3
+- `/about` page reflecting the manifesto in long form.
+- Bluesky-first webmentions.
 - Dark-mode toggle (currently honours `prefers-color-scheme` automatically).
-
-### P3 — Nice-to-have
-
-- A `/about` page reflecting the manifesto in long form.
-- Webmentions / commenting bridge (Bluesky-first).
-- A subscribe-by-email widget (Buttondown / Listmonk) tied to the RSS feed.
-
-## Next tasks
-
-1. **User to commit & push** the repo so Cloudflare deploys the new site.
-2. Replace placeholders in `transparent-vs-opaque-credit-default.mdx`
-   when dissertation numbers are final.
-3. Add real renders + decide whether `/models` should host interactive
-   GLB viewers.
+- Multiple SKUs / variants (different prints, mugs, etc.) if the first tee sells.
