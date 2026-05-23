@@ -3,263 +3,227 @@ import BaseHead from '../../components/BaseHead.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { PRODUCTS, formatPrice } from '../../lib/products';
+import { AUTHOR } from '../../consts';
 
-// The product page is fully static — the dynamic bit (checkout creation)
-// hits /api/checkout via fetch from the client.
+// All commerce machinery (api/checkout, api/checkout-status, lib/stripe,
+// lib/products) is intentionally left in place. Flipping `LAUNCHED` to
+// true on a future iteration restores the live product page.
+const LAUNCHED = false;
+
 const product = PRODUCTS['tee-transparent-opaque'];
 const price = formatPrice(product.unit_amount, product.currency);
+const todayIso = new Date().toISOString().slice(0, 10);
 
-const shippingRowsSummary = product.shipping_rates.map((r) => ({
-  name: r.display_name,
-  amount: formatPrice(r.amount, r.currency),
-  countries: r.allowed_countries.length,
-  delivery: `${r.delivery.min}–${r.delivery.max} ${r.delivery.unit}s`,
-}));
+type Status = 'done' | 'running' | 'pending';
+interface Stage {
+  idx: string;
+  name: string;
+  detail: string;
+  status: Status;
+  duration?: string;
+  ts?: string;
+}
+
+// Build-log style pipeline. Tweak as the actual schedule moves.
+const stages: Stage[] = [
+  { idx: '01', name: 'design',          detail: 'transparent / opaque wordmark · 2-colour spec',                   status: 'done',    duration: '02d 04h', ts: '2026-01-12' },
+  { idx: '02', name: 'fabric',          detail: '280gsm heavyweight cotton · cream · unisex block',                status: 'done',    duration: '01d 08h', ts: '2026-01-15' },
+  { idx: '03', name: 'fulfilment',      detail: 'printful pod evaluation · margin maths',                          status: 'running', duration: '— h',     ts: 'now' },
+  { idx: '04', name: 'print proof',     detail: 'screen print · oxidised orange + petrol blue · sample run',       status: 'pending' },
+  { idx: '05', name: 'photography',     detail: 'flat lay + on-body · neutral paper backdrop',                     status: 'pending' },
+  { idx: '06', name: 'stripe.prod',     detail: 'live api key · `wrangler secret put STRIPE_API_KEY`',             status: 'pending' },
+  { idx: '07', name: 'qc',              detail: 'fit, wash, alignment, colour cast at delta-e &lt; 3',             status: 'pending' },
+  { idx: '08', name: 'go live',         detail: '/shop · this page flips to product',                              status: 'pending' },
+];
+
+function statusLabel(s: Status): string {
+  return s === 'done' ? 'done' : s === 'running' ? 'running' : 'pending';
+}
+function statusGlyph(s: Status): string {
+  return s === 'done' ? '✓' : s === 'running' ? '⟳' : ' ';
+}
+
+const dagNodes = [
+  { lbl: 'design',     status: 'done' as Status },
+  { lbl: 'fulfil',     status: 'running' as Status },
+  { lbl: 'proof',      status: 'pending' as Status },
+  { lbl: 'photo',      status: 'pending' as Status },
+  { lbl: 'stripe',     status: 'pending' as Status },
+  { lbl: 'qc',         status: 'pending' as Status },
+  { lbl: 'live',       status: 'pending' as Status },
+];
+
+const completedCount = stages.filter((s) => s.status === 'done').length;
+const totalCount = stages.length;
+const pct = Math.round((completedCount / totalCount) * 100);
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <BaseHead
-      title="shop"
-      description={`${product.name} — ${price}. ${product.description}`}
+      title="shop · coming soon"
+      description={`${product.name} — coming soon. ${price} on launch. Pipeline currently ${pct}% complete.`}
     />
   </head>
   <body>
     <Header />
-    <main id="main" class="wrap" data-testid="shop-index">
+    <main id="main" class="wrap" data-testid="shop-coming-soon">
+
       <header class="page-head">
-        <span class="mono label">04 · shop</span>
-        <h1 class="page-title">shop.</h1>
+        <div class="meta-line">
+          <span class="mono label">04 · shop</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="mono dim">pipeline_id sku.tee.transparent_opaque · {todayIso}</span>
+        </div>
+
+        <h1 class="page-title">shop<span class="period">.</span></h1>
+
         <p class="lead">
-          One thing for sale. The same wordmark as the site, printed on a
-          heavyweight cream tee. Pays for the hosting and a coffee or two.
+          One thing is coming. <em>Transparent / Opaque</em> on a cream
+          heavyweight tee, screen-printed in two colours. The page below is
+          the build pipeline, not a placeholder.
         </p>
       </header>
 
-      <section class="product" data-testid="product">
-        <figure class="product-image" data-testid="product-image">
-          <img
-            src={product.image}
-            alt={`Front view of the ${product.name}`}
-            width="600"
-            height="600"
-          />
-          <figcaption class="mono caption">render // tee.01 · placeholder</figcaption>
-        </figure>
-
-        <div class="product-info">
-          <span class="chip --signal" data-testid="product-sku">{product.sku}</span>
-          <h2 class="product-name" data-testid="product-name">{product.name}</h2>
-          <p class="product-price" data-testid="product-price">
-            <span class="amount">{price}</span>
-            <span class="mono dim"> · gbp</span>
-          </p>
-          <p class="product-desc">{product.description}</p>
-
-          <div class="size-group" data-testid="size-selector">
-            <span class="uppercase-mono lbl">select size</span>
-            <div class="sizes" role="radiogroup" aria-label="Size">
-              {product.sizes.map((s, i) => (
-                <label class="size">
-                  <input
-                    type="radio"
-                    name="size"
-                    value={s}
-                    checked={i === 2}
-                    data-testid={`size-${s}`}
-                  />
-                  <span>{s}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <button
-            class="buy"
-            type="button"
-            id="buy-btn"
-            data-sku={product.sku}
-            data-testid="buy-button"
-          >
-            <span class="buy-lbl">→ checkout via stripe</span>
-            <span class="buy-amt mono">{price}</span>
-          </button>
-
-          <div class="status" id="status" data-testid="status" hidden></div>
-
-          <dl class="kv specs">
-            <dt>fabric</dt><dd>280gsm heavyweight cotton</dd>
-            <dt>fit</dt><dd>unisex, true to size</dd>
-            <dt>print</dt><dd>2-colour screen on chest (oxidised orange + petrol blue)</dd>
-            <dt>ships from</dt><dd>uk</dd>
-          </dl>
+      {/* ─── PIPELINE BANNER ─────────────────────────────────────── */}
+      <section class="banner" data-testid="pipeline-banner" aria-label="Pipeline status">
+        <div class="banner-row">
+          <span class="mono lbl">status</span>
+          <span class="mono badge --running">RUNNING</span>
+          <span class="mono lbl">progress</span>
+          <span class="mono val">{completedCount}/{totalCount} · {pct}%</span>
+          <span class="mono lbl">target ship</span>
+          <span class="mono val">tbc · q2 2026</span>
+        </div>
+        <div class="progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Pipeline progress">
+          <div class="bar" style={`width: ${pct}%`}></div>
+          <span class="ticks" aria-hidden="true">
+            {Array.from({ length: 10 }).map(() => <span class="tick"></span>)}
+          </span>
         </div>
       </section>
 
-      <section class="ship" data-testid="shipping-table">
+      {/* ─── BUILD LOG ───────────────────────────────────────────── */}
+      <section class="log" data-testid="pipeline-log" aria-label="Build log">
         <header class="rubric">
           <span class="idx">04.a</span>
-          <h2 class="title">shipping</h2>
-          <span class="meta">↘ tracked &amp; insured</span>
+          <h2 class="title">build log</h2>
+          <span class="meta">↘ stage · status · detail</span>
         </header>
-        <div class="ship-scroll">
-          <table>
-            <thead>
-              <tr><th>region</th><th>rate</th><th>countries</th><th>delivery</th></tr>
-            </thead>
-            <tbody>
-              {shippingRowsSummary.map((r) => (
-                <tr>
-                  <td>{r.name}</td>
-                  <td class="num">{r.amount}</td>
-                  <td class="num">{r.countries}</td>
-                  <td>{r.delivery}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        <ol class="stages">
+          {stages.map((s) => (
+            <li
+              class={`stage --${s.status}`}
+              data-testid={`stage-${s.idx}`}
+              data-status={s.status}
+            >
+              <span class="glyph" aria-hidden="true">[<span class="glyph-inner">{statusGlyph(s.status)}</span>]</span>
+              <span class="idx mono">{s.idx}</span>
+              <span class="name mono">{s.name}</span>
+              <span class="detail" set:html={s.detail}></span>
+              <span class="status-pill mono">{statusLabel(s.status)}</span>
+              <span class="ts mono">{s.ts ?? '—'}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* ─── DAG ────────────────────────────────────────────────── */}
+      <section class="dag" data-testid="pipeline-dag" aria-label="Pipeline DAG">
+        <header class="rubric">
+          <span class="idx">04.b</span>
+          <h2 class="title">dag</h2>
+          <span class="meta">↘ left-to-right</span>
+        </header>
+
+        <div class="dag-scroll">
+          <div class="dag-row" role="list">
+            {dagNodes.map((n, i) => (
+              <>
+                <div class={`node --${n.status}`} role="listitem" data-testid={`dag-${n.lbl}`}>
+                  <span class="glyph mono">{statusGlyph(n.status)}</span>
+                  <span class="lbl mono">{n.lbl}</span>
+                </div>
+                {i < dagNodes.length - 1 && (
+                  <span class="edge mono" aria-hidden="true">──▶</span>
+                )}
+              </>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section class="meta-block" data-testid="meta-block">
+      {/* ─── SPEC PEEK ──────────────────────────────────────────── */}
+      <section class="spec" data-testid="product-spec" aria-label="Product specification">
         <header class="rubric">
-          <span class="idx">04.b</span>
-          <h2 class="title">the short answer</h2>
+          <span class="idx">04.c</span>
+          <h2 class="title">on launch</h2>
+          <span class="meta">↘ provisional</span>
         </header>
-        <div class="meta-grid">
-          <div>
-            <h3>Why one thing?</h3>
-            <p class="muted">
-              A whole shop is a different job. One shirt is a small object that
-              earns its rent. If it sells out, I'll think about a second.
-            </p>
-          </div>
-          <div>
-            <h3>Where does the money go?</h3>
-            <p class="muted">
-              Cloudflare bills, an MSc dissertation that drinks coffee, and the
-              occasional 3D-printer filament reload.
-            </p>
-          </div>
-          <div>
-            <h3>Returns?</h3>
-            <p class="muted">
-              14 days, unworn, original packaging. Email
-              <a class="mono" href="mailto:julian@databased.business">julian@databased.business</a>.
-            </p>
-          </div>
-        </div>
+
+        <dl class="kv spec-kv">
+          <dt>sku</dt><dd class="mono">{product.sku}</dd>
+          <dt>price</dt><dd class="mono">{price} <span class="dim">· gbp</span></dd>
+          <dt>fabric</dt><dd>280gsm heavyweight cotton</dd>
+          <dt>print</dt><dd>2-colour screen · oxidised orange + petrol blue</dd>
+          <dt>sizes</dt><dd>{product.sizes.join(' · ')}</dd>
+          <dt>ships to</dt><dd>uk · eu · worldwide tracked</dd>
+        </dl>
       </section>
+
+      {/* ─── PING ───────────────────────────────────────────────── */}
+      <section class="ping" data-testid="ping-cta">
+        <header class="rubric">
+          <span class="idx">04.d</span>
+          <h2 class="title">ping me</h2>
+        </header>
+
+        <p class="muted">
+          No mailing list, no form, no analytics. If you want a single email
+          when the pipeline ships, drop me a line —
+        </p>
+        <p class="cta">
+          <a
+            class="mailto mono"
+            href={`mailto:${AUTHOR.email}?subject=ping%20me%20when%20the%20tee%20ships&body=Hi%20Julian%20—%20add%20me%20to%20the%20one-shot%20list%20for%20the%20transparent%20%2F%20opaque%20tee.`}
+            data-testid="ping-mailto"
+          >→ {AUTHOR.email}</a>
+        </p>
+        <p class="micro mono muted">
+          // i'll reply once, when the page flips. no other use.
+        </p>
+      </section>
+
     </main>
     <Footer />
 
-    <script is:inline>
-      (function () {
-        // ─── ui helpers ──────────────────────────────────────────
-        var statusEl = document.getElementById('status');
-        var buyBtn = document.getElementById('buy-btn');
-
-        function setStatus(msg, kind) {
-          statusEl.hidden = !msg;
-          statusEl.textContent = msg || '';
-          statusEl.className = 'status' + (kind ? ' --' + kind : '');
-        }
-        function getSize() {
-          var checked = document.querySelector('input[name="size"]:checked');
-          return checked ? checked.value : null;
-        }
-
-        // ─── return-from-stripe handling (success/cancel) ────────
-        var params = new URLSearchParams(window.location.search);
-        var sessionId = params.get('session_id');
-        var cancelled = params.get('status') === 'cancelled';
-        if (cancelled) {
-          setStatus('Checkout cancelled — your card was not charged.', 'cancelled');
-        } else if (sessionId) {
-          setStatus('Verifying payment with Stripe…', 'pending');
-          pollStatus(sessionId, 0);
-        }
-
-        function pollStatus(sid, attempts) {
-          var max = 6;
-          if (attempts >= max) {
-            setStatus(
-              'Status check timed out. If you completed payment, check your email — you’ll receive a Stripe receipt shortly.',
-              'warn'
-            );
-            return;
-          }
-          fetch('/api/checkout-status/' + encodeURIComponent(sid))
-            .then(function (r) {
-              if (!r.ok) throw new Error('http ' + r.status);
-              return r.json();
-            })
-            .then(function (data) {
-              if (data.payment_status === 'paid') {
-                var email = data.customer_email ? ' (' + data.customer_email + ')' : '';
-                var demoSuffix = data.demo_mode
-                  ? ' — [DEMO MODE] preview env can\u2019t verify, but Stripe processed the test card. Production verifies properly.'
-                  : '';
-                setStatus(
-                  '\u2713 Payment confirmed' + email + '. A receipt is on its way to you. Order ref: ' + sid.slice(-8) + demoSuffix,
-                  'ok'
-                );
-                buyBtn.disabled = true;
-                buyBtn.querySelector('.buy-lbl').textContent = '\u2713 purchased';
-                // clean session_id from URL so refresh doesn't re-poll
-                history.replaceState({}, '', window.location.pathname);
-                return;
-              }
-              if (data.status === 'expired' || data.payment_status === 'failed') {
-                setStatus('Payment did not complete. You can try again.', 'error');
-                return;
-              }
-              setStatus('Payment is processing…', 'pending');
-              setTimeout(function () { pollStatus(sid, attempts + 1); }, 1800);
-            })
-            .catch(function (err) {
-              console.error(err);
-              setStatus('Could not reach the status endpoint. Retrying…', 'warn');
-              setTimeout(function () { pollStatus(sid, attempts + 1); }, 2400);
-            });
-        }
-
-        // ─── buy handler ─────────────────────────────────────────
-        buyBtn.addEventListener('click', function () {
-          var size = getSize();
-          if (!size) { setStatus('Pick a size first.', 'warn'); return; }
-          buyBtn.disabled = true;
-          setStatus('Opening secure checkout…', 'pending');
-
-          fetch('/api/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sku: buyBtn.getAttribute('data-sku'),
-              size: size,
-              origin: window.location.origin,
-            }),
-          })
-            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-            .then(function (res) {
-              if (!res.ok || !res.d.url) {
-                throw new Error(res.d.error || 'Failed to open checkout.');
-              }
-              window.location.href = res.d.url;
-            })
-            .catch(function (err) {
-              buyBtn.disabled = false;
-              setStatus('Couldn’t start checkout: ' + err.message, 'error');
-            });
-        });
-      })();
-    </script>
-
     <style>
       .page-head { padding: var(--s-5) 0 var(--s-3); }
-      .label { color: var(--ink-3); }
+
+      .meta-line {
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+        font-family: var(--f-mono);
+        font-size: var(--t-mono);
+        letter-spacing: 0.04em;
+        margin-bottom: var(--s-3);
+        flex-wrap: wrap;
+      }
+      .meta-line .label { color: var(--ink-3); }
+      .meta-line .dim { color: var(--ink-3); }
+      .meta-line .dot {
+        width: 5px; height: 5px;
+        background: var(--signal);
+        border-radius: 50%;
+        animation: blink 2.4s steps(2) infinite;
+      }
+      @keyframes blink { 50% { opacity: 0.25; } }
+
       .page-title {
+        font-family: var(--f-display);
         font-size: clamp(48px, 9vw, 96px);
         line-height: 0.96;
         margin: 6px 0 var(--s-2) 0;
@@ -267,190 +231,225 @@ const shippingRowsSummary = product.shipping_rates.map((r) => ({
         letter-spacing: -0.03em;
         color: var(--signal);
       }
+      .page-title .period { color: var(--ink); }
 
-      .product {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--s-4);
-        margin-top: var(--s-3);
-        padding-bottom: var(--s-5);
-      }
-      @media (max-width: 800px) {
-        .product { grid-template-columns: 1fr; }
+      .lead {
+        max-width: 56ch;
+        font-size: clamp(17px, 1.3vw, 20px);
+        color: var(--ink-2);
+        margin-bottom: var(--s-3);
       }
 
-      .product-image {
-        margin: 0;
-        background: #1a1a14;
+      /* ── banner ───────────────────────────────────────── */
+      .banner {
+        margin: var(--s-3) 0 var(--s-4) 0;
         border: 1px solid var(--rule);
-        overflow: hidden;
-        aspect-ratio: 1;
-      }
-      .product-image img { width: 100%; height: 100%; display: block; }
-      .caption {
         background: var(--bg-card);
-        font-size: var(--t-mono);
-        color: var(--ink-3);
-        padding: 6px var(--s-2);
-        border-top: 1px solid var(--rule);
+        padding: var(--s-2) var(--s-3);
       }
-
-      .product-info { display: flex; flex-direction: column; gap: var(--s-2); }
-
-      .product-name {
-        font-family: var(--f-display);
-        font-size: clamp(28px, 4vw, 42px);
-        font-variation-settings: "opsz" 60, "SOFT" 40;
-        line-height: 1.05;
-        margin: 4px 0 0 0;
-        color: var(--ink);
-        letter-spacing: -0.02em;
-      }
-      .product-price { margin: 0; }
-      .product-price .amount {
-        font-family: var(--f-display);
-        font-size: 32px;
-        color: var(--signal);
-        font-variation-settings: "opsz" 60;
-      }
-      .product-price .dim { color: var(--ink-3); }
-      .product-desc { color: var(--ink-2); margin: 0 0 var(--s-2) 0; max-width: 56ch; }
-
-      .size-group { margin-top: var(--s-1); }
-      .size-group .lbl { display: block; margin-bottom: 8px; }
-      .sizes {
+      .banner-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-      }
-      .size {
-        display: inline-flex;
+        gap: 10px 18px;
         align-items: center;
-        justify-content: center;
-        min-width: 52px;
-        height: 40px;
-        padding: 0 12px;
+        font-size: var(--t-mono);
+      }
+      .banner-row .lbl { color: var(--ink-3); }
+      .banner-row .val { color: var(--ink); }
+      .banner-row .badge {
+        padding: 2px 8px;
         border: 1px solid var(--rule);
-        background: var(--bg-card);
-        cursor: pointer;
-        transition: all .15s ease;
-        font-family: var(--f-mono);
-        font-size: 14px;
-        color: var(--ink);
+        border-radius: 2px;
+        letter-spacing: 0.08em;
+        font-size: 11.5px;
       }
-      .size input { position: absolute; opacity: 0; pointer-events: none; }
-      .size:hover { border-color: var(--ink-2); }
-      .size:has(input:checked) {
-        background: var(--ink);
-        color: var(--paper);
-        border-color: var(--ink);
+      .banner-row .badge.--running {
+        color: var(--signal);
+        border-color: color-mix(in srgb, var(--signal) 50%, var(--rule));
+        background: color-mix(in srgb, var(--signal) 6%, transparent);
       }
-
-      .buy {
-        margin-top: var(--s-2);
-        background: var(--ink);
-        color: var(--paper);
-        border: 1px solid var(--ink);
-        padding: 16px 22px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        font-family: var(--f-mono);
-        font-size: 15px;
-        letter-spacing: 0.02em;
-        transition: background .2s ease, color .2s ease, transform .15s ease;
-      }
-      .buy:hover:not(:disabled) {
-        background: var(--signal);
-        border-color: var(--signal);
-        transform: translateY(-1px);
-      }
-      .buy:disabled { opacity: 0.6; cursor: not-allowed; }
-      .buy .buy-amt { color: inherit; opacity: 0.85; }
-
-      .status {
-        margin-top: 6px;
-        padding: 10px 14px;
+      .progress {
+        margin-top: 10px;
+        position: relative;
+        height: 8px;
+        background: var(--paper-2);
         border: 1px solid var(--rule);
-        background: var(--bg-card);
+        overflow: hidden;
+      }
+      .bar {
+        height: 100%;
+        background:
+          repeating-linear-gradient(
+            45deg,
+            var(--signal),
+            var(--signal) 4px,
+            color-mix(in srgb, var(--signal) 75%, transparent) 4px,
+            color-mix(in srgb, var(--signal) 75%, transparent) 8px
+          );
+        transition: width .8s ease;
+        animation: stripe 1.4s linear infinite;
+      }
+      @keyframes stripe {
+        0%   { background-position:   0 0; }
+        100% { background-position: 24px 0; }
+      }
+      .ticks {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+      }
+      .ticks .tick {
+        border-right: 1px solid color-mix(in srgb, var(--paper) 70%, transparent);
+      }
+      .ticks .tick:last-child { border-right: 0; }
+
+      /* ── build log ────────────────────────────────────── */
+      .log { padding-bottom: var(--s-4); }
+      .stages {
+        list-style: none;
+        margin: var(--s-2) 0 0 0;
+        padding: 0;
         font-family: var(--f-mono);
         font-size: 13.5px;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: 28px 32px 110px 1fr 90px 110px;
+        align-items: baseline;
+        gap: 12px;
+        padding: 10px 12px;
+        border-top: 1px solid var(--rule);
         color: var(--ink-2);
       }
-      .status.--ok { border-color: color-mix(in srgb, var(--depth) 60%, var(--rule)); color: var(--depth); }
-      .status.--error { border-color: color-mix(in srgb, var(--signal) 60%, var(--rule)); color: var(--signal); }
-      .status.--cancelled { border-color: color-mix(in srgb, var(--signal) 40%, var(--rule)); }
-      .status.--pending::before {
-        content: "";
-        display: inline-block;
-        width: 6px; height: 6px;
-        background: var(--signal);
-        border-radius: 50%;
-        margin-right: 8px;
-        vertical-align: middle;
-        animation: blink 1.2s steps(2) infinite;
+      .stage:last-child { border-bottom: 1px solid var(--rule); }
+      .stage .glyph { color: var(--ink-3); }
+      .stage .idx { color: var(--ink-3); }
+      .stage .name { color: var(--ink); letter-spacing: 0.02em; }
+      .stage .detail {
+        color: var(--ink-2);
+        font-family: var(--f-body);
+        font-size: 14.5px;
+        line-height: 1.45;
+        min-width: 0;
+        word-wrap: break-word;
       }
-      @keyframes blink { 50% { opacity: 0.3; } }
+      .stage .status-pill {
+        color: var(--ink-3);
+        font-size: 11.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        text-align: right;
+      }
+      .stage .ts { color: var(--ink-3); text-align: right; font-size: 12px; }
 
-      .specs { grid-template-columns: 100px 1fr; margin-top: var(--s-3); }
+      .stage.--done .glyph-inner { color: var(--depth); }
+      .stage.--done .name { color: var(--ink); }
+      .stage.--done .status-pill { color: var(--depth); }
 
-      /* shipping */
-      .ship { padding-bottom: var(--s-5); }
-      .ship-scroll {
+      .stage.--running { background: color-mix(in srgb, var(--signal) 5%, transparent); }
+      .stage.--running .glyph-inner {
+        color: var(--signal);
+        display: inline-block;
+        animation: spin 1.6s linear infinite;
+      }
+      .stage.--running .name { color: var(--signal); }
+      .stage.--running .status-pill { color: var(--signal); }
+      .stage.--running .ts { color: var(--signal); }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+
+      .stage.--pending .name { color: var(--ink-3); }
+      .stage.--pending .detail { color: var(--ink-3); }
+
+      @media (max-width: 800px) {
+        .stage {
+          grid-template-columns: 22px 28px 1fr 80px;
+        }
+        .stage .detail { grid-column: 2 / -1; }
+        .stage .ts { display: none; }
+      }
+
+      /* ── DAG ──────────────────────────────────────────── */
+      .dag { padding-bottom: var(--s-4); }
+      .dag-scroll {
         margin-top: var(--s-2);
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        padding: var(--s-3) var(--s-2);
+        border: 1px solid var(--rule);
+        background: var(--bg-card);
       }
-      .ship table {
-        width: 100%;
-        min-width: 480px;
-        border-collapse: collapse;
+      .dag-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: max-content;
+      }
+      .node {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border: 1px solid var(--rule);
+        background: var(--paper);
         font-family: var(--f-mono);
-        font-size: 13.5px;
+        font-size: 13px;
+        color: var(--ink-2);
+        white-space: nowrap;
       }
-      .ship th, .ship td {
-        text-align: left;
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--rule);
-      }
-      .ship th {
-        background: var(--paper-2);
+      .node .glyph { color: var(--ink-3); }
+      .edge {
         color: var(--ink-3);
-        text-transform: lowercase;
-        font-weight: 500;
-        letter-spacing: 0.04em;
+        letter-spacing: -0.1em;
+        font-size: 14px;
       }
-      .ship td.num { color: var(--ink); }
-      .ship tr:hover td { background: color-mix(in srgb, var(--signal) 4%, transparent); }
+      .node.--done { border-color: color-mix(in srgb, var(--depth) 50%, var(--rule)); color: var(--depth); }
+      .node.--done .glyph { color: var(--depth); }
+      .node.--running {
+        border-color: var(--signal);
+        color: var(--signal);
+        background: color-mix(in srgb, var(--signal) 7%, var(--paper));
+      }
+      .node.--running .glyph {
+        color: var(--signal);
+        display: inline-block;
+        animation: spin 1.6s linear infinite;
+      }
+      .node.--pending { color: var(--ink-3); }
 
-      /* tighten the product page for small phones */
-      @media (max-width: 480px) {
-        .product { gap: var(--s-3); }
-        .product-name { font-size: 26px; }
-        .product-price .amount { font-size: 26px; }
-        .buy { padding: 14px 16px; font-size: 13.5px; flex-wrap: wrap; gap: 6px; }
-        .status { font-size: 12.5px; word-break: break-word; overflow-wrap: anywhere; }
-        .chip { max-width: 100%; word-break: break-all; }
+      /* ── spec ─────────────────────────────────────────── */
+      .spec { padding-bottom: var(--s-4); }
+      .spec-kv {
+        grid-template-columns: 90px 1fr;
+        max-width: 640px;
+        margin-top: var(--s-2);
       }
-      .product-info { min-width: 0; }
-      .status { word-break: break-word; overflow-wrap: anywhere; }
+      .spec-kv .dim { color: var(--ink-3); }
 
-      /* meta */
-      .meta-block { padding-bottom: var(--s-6); }
-      .meta-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--s-4);
-        margin-top: var(--s-3);
+      /* ── ping ─────────────────────────────────────────── */
+      .ping { padding-bottom: var(--s-6); }
+      .ping .muted { max-width: 60ch; }
+      .cta { margin: var(--s-2) 0 var(--s-1) 0; }
+      .mailto {
+        display: inline-block;
+        padding: 10px 16px;
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: var(--paper);
+        font-size: 14px;
+        letter-spacing: 0.02em;
+        transition: background .2s ease, color .2s ease, transform .15s ease;
       }
-      @media (max-width: 800px) { .meta-grid { grid-template-columns: 1fr; } }
-      .meta-grid h3 {
-        font-family: var(--f-display);
-        font-size: 20px;
-        margin-bottom: 6px;
+      .mailto:hover {
+        background: var(--signal);
+        border-color: var(--signal);
+        color: var(--paper);
+        transform: translateY(-1px);
       }
-      .meta-grid p { font-size: 15px; margin: 0; }
+      .micro { font-size: 11.5px; margin: 6px 0 0 0; }
     </style>
   </body>
 </html>
