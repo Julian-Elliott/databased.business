@@ -28,9 +28,9 @@ const todayIso = new Date().toISOString().slice(0, 10);
 
       <header class="page-head" data-testid="page-head">
         <div class="meta-line">
-          <span class="mono">log // {todayIso}</span>
+          <span class="mono label">01 · field notes</span>
           <span class="dot" aria-hidden="true"></span>
-          <span class="mono">julian elliott · msc data analytics</span>
+          <span class="mono dim">{posts.length} essays · last updated {todayIso}</span>
         </div>
 
         <h1 class="page-title">
@@ -100,10 +100,12 @@ const todayIso = new Date().toISOString().slice(0, 10);
         gap: var(--s-2);
         font-family: var(--f-mono);
         font-size: var(--t-mono);
-        color: var(--ink-3);
         letter-spacing: 0.04em;
         margin-bottom: var(--s-3);
+        flex-wrap: wrap;
       }
+      .meta-line .label { color: var(--ink-3); }
+      .meta-line .dim { color: var(--ink-3); }
       .meta-line .dot {
         width: 5px; height: 5px;
         background: var(--signal);
