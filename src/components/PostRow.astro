@@ -1,0 +1,100 @@
+---
+import FormattedDate from './FormattedDate.astro';
+import Sparkline from './Sparkline.astro';
+
+interface Props {
+  href: string;
+  idx: string;
+  title: string;
+  description: string;
+  pubDate: Date;
+  readingTime?: string;
+  tag?: string;
+  spark?: number[];
+}
+const { href, idx, title, description, pubDate, readingTime, tag, spark } = Astro.props;
+
+const defaultSpark = [3, 5, 4, 6, 5, 8, 7, 11, 9, 12, 11, 14];
+---
+
+<article class="row" data-testid={`post-row-${idx}`}>
+  <a class="link" href={href} data-testid={`post-link-${idx}`}>
+    <span class="idx">{idx}</span>
+
+    <div class="body">
+      <h3 class="title">{title}</h3>
+      <p class="desc">{description}</p>
+
+      <dl class="kv meta">
+        <dt>pub</dt><dd><FormattedDate date={pubDate} /></dd>
+        {readingTime && (<><dt>read</dt><dd>{readingTime}</dd></>)}
+        {tag && (<><dt>tag</dt><dd>{tag}</dd></>)}
+      </dl>
+    </div>
+
+    <div class="spark-wrap" aria-hidden="true">
+      <Sparkline values={spark && spark.length ? spark : defaultSpark} width={92} height={28} />
+    </div>
+  </a>
+</article>
+
+<style>
+  .row {
+    border-top: 1px solid var(--rule);
+  }
+  .row:last-child { border-bottom: 1px solid var(--rule); }
+  .link {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: var(--s-3);
+    padding: var(--s-3) 0;
+    color: var(--ink);
+    text-decoration: none;
+    align-items: start;
+    transition: background-color .2s ease;
+  }
+  .link:hover {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--signal) 6%, transparent),
+        transparent 60%
+      );
+  }
+  .idx {
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    color: var(--ink-3);
+    letter-spacing: 0.06em;
+    padding-top: 6px;
+  }
+  .link:hover .idx { color: var(--signal); }
+  .title {
+    font-family: var(--f-display);
+    font-size: clamp(22px, 3.2vw, 32px);
+    font-variation-settings: "opsz" 60, "SOFT" 40;
+    margin: 0 0 6px 0;
+    line-height: 1.08;
+    color: var(--ink);
+  }
+  .desc {
+    color: var(--ink-2);
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    max-width: 64ch;
+  }
+  .meta { grid-template-columns: 36px 1fr; margin: 0; }
+  .meta dt { color: var(--ink-3); }
+  .meta dd { color: var(--ink-2); }
+  .spark-wrap {
+    color: var(--signal);
+    align-self: center;
+    opacity: 0.85;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .link:hover .spark-wrap { opacity: 1; transform: translateX(-2px); }
+  @media (max-width: 700px) {
+    .link { grid-template-columns: 36px 1fr; }
+    .spark-wrap { display: none; }
+  }
+</style>

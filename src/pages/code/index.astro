@@ -1,0 +1,135 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import RepoCard from '../../components/RepoCard.astro';
+import { fetchRepos, groupByLanguage, pseudoSpark } from '../../lib/github';
+import { AUTHOR } from '../../consts';
+
+const repos = await fetchRepos(AUTHOR.handle);
+const visible = repos.filter((r) => !r.archived);
+const archived = repos.filter((r) => r.archived);
+const langs = groupByLanguage(visible);
+const totalStars = visible.reduce((acc, r) => acc + r.stars, 0);
+
+const lastPushed =
+  visible.length > 0
+    ? new Date(Math.max(...visible.map((r) => r.updated.getTime()))).toISOString().slice(0, 10)
+    : '—';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="shipped code"
+      description="Live mirror of public repositories from github.com/Julian-Elliott, sorted by last push."
+    />
+  </head>
+  <body>
+    <Header />
+    <main id="main" class="wrap" data-testid="code-index">
+      <header class="page-head">
+        <span class="mono label">03 · shipped code</span>
+        <h1 class="page-title">shipped code.</h1>
+        <p class="lead">
+          Live mirror of <a class="mono" href={AUTHOR.github} target="_blank" rel="noopener noreferrer">github.com/Julian-Elliott</a> —
+          rebuilt every deploy. Sorted by last push, filterable by language.
+        </p>
+
+        <dl class="kv head-kv">
+          <dt>repos</dt><dd>{visible.length} active</dd>
+          {archived.length > 0 && (<><dt>archived</dt><dd>{archived.length}</dd></>)}
+          <dt>stars</dt><dd>{totalStars}</dd>
+          <dt>last push</dt><dd>{lastPushed}</dd>
+        </dl>
+
+        <div class="filters" data-testid="filters">
+          <button class="chip active" data-filter="all" data-testid="lang-filter-all">all <span class="dim">· {visible.length}</span></button>
+          {[...langs.entries()].slice(0, 10).map(([lang, count]) => (
+            <button class="chip" data-filter={lang} data-testid={`lang-filter-${lang.toLowerCase()}`}>
+              {lang.toLowerCase()} <span class="dim">· {count}</span>
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <section class="rows" data-testid="repo-rows">
+        {visible.map((r, i) => (
+          <div class="row-wrap" data-lang={r.language ?? 'Other'}>
+            <RepoCard
+              idx={String(i + 1).padStart(2, '0')}
+              name={r.name}
+              url={r.url}
+              description={r.description}
+              language={r.language}
+              stars={r.stars}
+              forks={r.forks}
+              updated={r.updated}
+              topics={r.topics}
+              spark={pseudoSpark(r.name, r.updated)}
+            />
+          </div>
+        ))}
+      </section>
+
+      <p class="footnote mono muted">
+        // activity sparklines are decorative — derived from repo name + last
+        push timestamp, not real commit history.
+      </p>
+    </main>
+    <Footer />
+
+    <script is:inline>
+      (function () {
+        var buttons = document.querySelectorAll('[data-filter]');
+        var rows = document.querySelectorAll('[data-lang]');
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var f = btn.getAttribute('data-filter');
+            buttons.forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            rows.forEach(function (r) {
+              if (f === 'all' || r.getAttribute('data-lang') === f) {
+                r.style.display = '';
+              } else {
+                r.style.display = 'none';
+              }
+            });
+          });
+        });
+      })();
+    </script>
+
+    <style>
+      .page-head { padding: var(--s-5) 0 var(--s-3); }
+      .label { color: var(--ink-3); }
+      .page-title {
+        font-size: clamp(48px, 9vw, 96px);
+        line-height: 0.96;
+        margin: 6px 0 var(--s-2) 0;
+        font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 1;
+        letter-spacing: -0.03em;
+        color: var(--depth);
+      }
+      .head-kv { grid-template-columns: 90px 1fr; max-width: 520px; margin-top: var(--s-2); }
+      .filters {
+        display: flex; flex-wrap: wrap; gap: 8px;
+        margin-top: var(--s-3);
+      }
+      .filters .chip {
+        cursor: pointer;
+        transition: border-color .15s ease, color .15s ease, background .15s ease;
+      }
+      .filters .chip:hover { border-color: var(--depth); color: var(--depth); }
+      .filters .chip.active {
+        background: var(--depth); color: var(--paper);
+        border-color: var(--depth);
+      }
+      .filters .dim { color: var(--ink-3); }
+      .filters .chip.active .dim { color: color-mix(in srgb, var(--paper) 70%, transparent); }
+      .rows { margin-top: var(--s-2); padding-bottom: var(--s-3); }
+      .footnote { font-size: 12.5px; margin: 0 0 var(--s-6) 0; }
+    </style>
+  </body>
+</html>

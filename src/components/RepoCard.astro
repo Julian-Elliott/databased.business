@@ -1,0 +1,117 @@
+---
+import FormattedDate from './FormattedDate.astro';
+import Sparkline from './Sparkline.astro';
+
+interface Props {
+  idx: string;
+  name: string;
+  url: string;
+  description: string;
+  language: string | null;
+  stars: number;
+  forks: number;
+  updated: Date;
+  topics?: string[];
+  spark?: number[];
+}
+const { idx, name, url, description, language, stars, forks, updated, topics, spark } = Astro.props;
+---
+
+<article class="repo" data-testid={`repo-card-${idx}`}>
+  <a class="link" href={url} target="_blank" rel="noopener noreferrer" data-testid={`repo-link-${idx}`}>
+    <span class="idx mono">{idx}</span>
+
+    <div class="body">
+      <header class="head">
+        <h3 class="name">
+          <span class="ns">julian-elliott</span><span class="slash">/</span>{name}
+        </h3>
+        {language && <span class="lang chip">{language.toLowerCase()}</span>}
+      </header>
+      <p class="desc">{description || 'No description provided.'}</p>
+      {topics && topics.length > 0 && (
+        <div class="topics">
+          {topics.slice(0, 6).map((t) => (<span class="topic">#{t}</span>))}
+        </div>
+      )}
+      <dl class="kv stats">
+        <dt>stars</dt><dd>{stars}</dd>
+        <dt>forks</dt><dd>{forks}</dd>
+        <dt>pushed</dt><dd><FormattedDate date={updated} /></dd>
+      </dl>
+    </div>
+
+    <div class="spark-wrap" aria-hidden="true">
+      {spark && spark.length > 0 && (
+        <Sparkline values={spark} width={96} height={28} />
+      )}
+    </div>
+  </a>
+</article>
+
+<style>
+  .repo { border-top: 1px solid var(--rule); }
+  .repo:last-child { border-bottom: 1px solid var(--rule); }
+  .link {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: var(--s-3);
+    padding: var(--s-3) 0;
+    color: var(--ink);
+    text-decoration: none;
+    align-items: start;
+    transition: background-color .2s ease;
+  }
+  .link:hover {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--depth) 7%, transparent),
+        transparent 60%
+      );
+  }
+  .idx { color: var(--ink-3); padding-top: 6px; }
+  .link:hover .idx { color: var(--depth); }
+  .head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .name {
+    font-family: var(--f-mono);
+    font-size: 17px;
+    color: var(--ink);
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+  .ns { color: var(--ink-3); }
+  .slash { color: var(--ink-3); padding: 0 2px; }
+  .lang { font-size: 11px; }
+  .desc {
+    color: var(--ink-2);
+    font-size: 15.5px;
+    margin: 0 0 8px 0;
+    max-width: 70ch;
+  }
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-bottom: 8px;
+  }
+  .topic {
+    font-family: var(--f-mono);
+    font-size: 11.5px;
+    color: var(--depth);
+    letter-spacing: 0.02em;
+  }
+  .stats { grid-template-columns: 60px auto; margin: 0; }
+  .spark-wrap { color: var(--depth); align-self: center; opacity: 0.8; }
+  .link:hover .spark-wrap { opacity: 1; }
+  @media (max-width: 700px) {
+    .link { grid-template-columns: 36px 1fr; }
+    .spark-wrap { display: none; }
+  }
+</style>

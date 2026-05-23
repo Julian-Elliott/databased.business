@@ -2,110 +2,115 @@
 import BaseHead from '../../components/BaseHead.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
+import SectionRubric from '../../components/SectionRubric.astro';
+import PostRow from '../../components/PostRow.astro';
+import { SITE_TITLE } from '../../consts';
 import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const posts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const tags = Array.from(
+  new Set(posts.map((p) => p.data.tag).filter((t): t is string => !!t)),
 );
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									<img width={720} height={360} src={post.data.heroImage} alt="" />
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
+  <head>
+    <BaseHead
+      title="field notes"
+      description={`All ${posts.length} essays, in reverse chronological order.`}
+    />
+  </head>
+  <body>
+    <Header />
+    <main id="main" class="wrap" data-testid="blog-index">
+      <header class="page-head">
+        <span class="mono label">01 · field notes</span>
+        <h1 class="page-title">field notes.</h1>
+        <p class="lead">
+          Long-form essays from the lab. Methodology in plain English; receipts
+          in mono. Filterable by tag.
+        </p>
+        <div class="filters" data-testid="filters">
+          <button class="chip active" data-filter="all" data-testid="filter-all">all <span class="dim">· {posts.length}</span></button>
+          {tags.map((t) => (
+            <button class="chip" data-filter={t} data-testid={`filter-${t}`}>{t.toLowerCase()}</button>
+          ))}
+        </div>
+      </header>
+
+      <section class="rows" data-testid="post-rows">
+        {posts.map((p, i) => (
+          <div class="row-wrap" data-tag={p.data.tag ?? ''}>
+            <PostRow
+              href={`/blog/${p.id}/`}
+              idx={String(i + 1).padStart(2, '0')}
+              title={p.data.title}
+              description={p.data.description}
+              pubDate={p.data.pubDate}
+              readingTime={p.data.readingTime}
+              tag={p.data.tag}
+              spark={p.data.spark}
+            />
+          </div>
+        ))}
+      </section>
+    </main>
+    <Footer />
+
+    <script is:inline>
+      (function () {
+        var buttons = document.querySelectorAll('[data-filter]');
+        var rows = document.querySelectorAll('[data-tag]');
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var f = btn.getAttribute('data-filter');
+            buttons.forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            rows.forEach(function (r) {
+              if (f === 'all' || r.getAttribute('data-tag') === f) {
+                r.style.display = '';
+              } else {
+                r.style.display = 'none';
+              }
+            });
+          });
+        });
+      })();
+    </script>
+
+    <style>
+      .page-head { padding: var(--s-5) 0 var(--s-3); }
+      .label { color: var(--ink-3); }
+      .page-title {
+        font-size: clamp(48px, 9vw, 96px);
+        line-height: 0.96;
+        margin: 6px 0 var(--s-2) 0;
+        font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 1;
+        letter-spacing: -0.03em;
+      }
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: var(--s-3);
+      }
+      .filters .chip {
+        cursor: pointer;
+        transition: border-color .15s ease, color .15s ease, background .15s ease;
+      }
+      .filters .chip:hover { border-color: var(--signal); color: var(--signal); }
+      .filters .chip.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+      .filters .dim { color: var(--ink-3); }
+      .filters .chip.active .dim { color: color-mix(in srgb, var(--paper) 70%, transparent); }
+      .rows { margin-top: var(--s-2); padding-bottom: var(--s-6); }
+    </style>
+  </body>
 </html>

@@ -2,7 +2,9 @@
 title: "A Field Guide to Data Democratisation"
 description: "Seven practical moves for making analytics discoverable, governable, and genuinely useful."
 pubDate: "Apr 18 2024"
-heroImage: "/blog-placeholder-1.jpg"
+tag: "democratisation"
+readingTime: "6 min"
+spark: [3, 4, 5, 4, 6, 7, 6, 8, 9, 8, 10, 11]
 ---
 
 Building a data-informed culture rarely fails because a team lacks dashboards. Instead, most initiatives stall when people cannot

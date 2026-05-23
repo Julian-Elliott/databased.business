@@ -1,24 +1,51 @@
 ---
 import type { HTMLAttributes } from 'astro/types';
 
-type Props = HTMLAttributes<'a'>;
+type Props = HTMLAttributes<'a'> & { idx?: string };
 
-const { href, class: className, ...props } = Astro.props;
+const { href, class: className, idx, ...props } = Astro.props;
 const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, '');
 const subpath = pathname.match(/[^\/]+/g);
-const isActive = href === pathname || href === '/' + (subpath?.[0] || '');
+const current = '/' + (subpath?.[0] || '');
+const isActive = href === pathname || href === current;
 ---
 
-<a href={href} class:list={[className, { active: isActive }]} {...props}>
-	<slot />
+<a
+  href={href}
+  class:list={[className, 'header-link', { active: isActive }]}
+  data-testid={`nav-link-${(idx ?? '').replace('.', '-')}`}
+  {...props}
+>
+  {idx && <span class="idx" aria-hidden="true">{idx}</span>}
+  <span class="lbl"><slot /></span>
 </a>
+
 <style>
-	a {
-		display: inline-block;
-		text-decoration: none;
-	}
-	a.active {
-		font-weight: bolder;
-		text-decoration: underline;
-	}
+  .header-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--f-mono);
+    font-size: var(--t-mono);
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    color: var(--ink-2);
+    padding: 10px 0;
+    position: relative;
+  }
+  .idx { color: var(--ink-3); font-feature-settings: "tnum" 1; }
+  .lbl { color: inherit; }
+  .header-link:hover { color: var(--signal); }
+  .header-link:hover .idx { color: var(--signal); }
+  .header-link.active { color: var(--signal); }
+  .header-link.active .idx { color: var(--signal); }
+  .header-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 1px;
+    background: var(--signal);
+  }
 </style>

@@ -1,0 +1,76 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ModelCard from '../../components/ModelCard.astro';
+import { models } from '../../data/models';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title="renders"
+      description="3D models I have made: studies, prototypes, and shipped objects."
+    />
+  </head>
+  <body>
+    <Header />
+    <main id="main" class="wrap" data-testid="models-index">
+      <header class="page-head">
+        <span class="mono label">02 · renders</span>
+        <h1 class="page-title">renders.</h1>
+        <p class="lead">
+          A working catalogue of 3D models — Blender geometry studies, Fusion
+          mechanical parts, and the odd printed object. Real renders drop in
+          as they're finalised; the wireframes below are algorithmic placeholders.
+        </p>
+        <dl class="kv head-kv">
+          <dt>tools</dt><dd>blender · fusion 360 · onshape</dd>
+          <dt>focus</dt><dd>geometry nodes, snap-fit assemblies, soft goods</dd>
+        </dl>
+      </header>
+
+      <section class="grid models" data-testid="models-grid">
+        {models.map((m) => (
+          <ModelCard
+            idx={m.idx}
+            title={m.title}
+            caption={m.caption}
+            medium={m.medium}
+            polys={m.polys}
+            year={m.year}
+            status={m.status}
+          />
+        ))}
+      </section>
+
+      <p class="footnote mono muted">
+        // wireframes are derived algorithmically from each title — placeholders
+        until real renders are dropped into <code>/public/models/</code>.
+      </p>
+    </main>
+    <Footer />
+
+    <style>
+      .page-head { padding: var(--s-5) 0 var(--s-3); }
+      .label { color: var(--ink-3); }
+      .page-title {
+        font-size: clamp(48px, 9vw, 96px);
+        line-height: 0.96;
+        margin: 6px 0 var(--s-2) 0;
+        font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 1;
+        letter-spacing: -0.03em;
+        color: var(--depth);
+      }
+      .head-kv { grid-template-columns: 80px 1fr; max-width: 520px; margin-top: var(--s-2); }
+      .models {
+        grid-template-columns: repeat(3, 1fr);
+        margin: var(--s-3) 0 var(--s-5) 0;
+      }
+      @media (max-width: 1000px) { .models { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 640px)  { .models { grid-template-columns: 1fr; } }
+      .footnote { font-size: 12.5px; margin: 0 0 var(--s-6) 0; }
+    </style>
+  </body>
+</html>

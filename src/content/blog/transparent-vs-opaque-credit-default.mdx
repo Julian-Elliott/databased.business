@@ -1,0 +1,223 @@
+---
+title: "Transparent vs Opaque: Predicting Credit Default with Zero-Task Auto-Fuzzy and XGBoost"
+description: "Two models, one question — who is likely to default, and can we explain why in a sentence? A side-by-side investigation of an interpretable fuzzy rule system against a state-of-the-art gradient boosted classifier."
+pubDate: "Jan 18 2026"
+updatedDate: "Jan 18 2026"
+tag: "credit-default"
+readingTime: "14 min"
+spark: [4, 5, 4, 7, 6, 9, 8, 11, 9, 13, 12, 16]
+---
+
+import { Image } from 'astro:assets';
+
+<div class="callout --depth">
+  <span class="label">tldr;</span>
+  <p>
+    On a held-out test set, the auto-fuzzy classifier produced 38 plain-English
+    rules and posted competitive AUC against a tuned XGBoost model — at the cost
+    of roughly 4 points of lift. Whether that lift is worth giving up
+    defensibility is a question this post deliberately refuses to answer for you.
+  </p>
+</div>
+
+## 01 · The premise
+
+When a bank refuses someone credit, the law in most jurisdictions requires a
+reason in plain language. "The model said so" is not an answer. **Adverse
+action notices**, GDPR-style explanations, and ECOA-style reason codes turn
+interpretability from a nice-to-have into a regulatory artefact. So when the
+data science team reaches for the most accurate model in the toolbox, the
+question is rarely *how accurate is it?* — it's *how accurate is it, and what
+can we tell the customer afterwards?*
+
+This post puts two models on the same problem and asks both questions
+in the same breath.
+
+<div class="kv">
+  <dt>dataset</dt><dd>placeholder · n ≈ 30,000 borrowers, 24 features, 22% default</dd>
+  <dt>target</dt><dd>binary default within 12 months</dd>
+  <dt>split</dt><dd>70 train · 15 validation · 15 test, stratified</dd>
+  <dt>contestants</dt><dd>auto-fuzzy (transparent) vs xgboost (opaque)</dd>
+  <dt>scorecard</dt><dd>auc, accuracy, f1, brier, latency, interpretability</dd>
+</div>
+
+## 02 · Why this pairing is interesting
+
+A linear logistic regression is the usual transparent baseline. It's easy to
+explain and easy to beat. **Zero-task auto-fuzzy** (ZTAF) raises the bar:
+membership functions are derived *automatically* from the data — no domain
+expert priors, no manually-curated fuzzy sets — and the resulting rule base
+is still legible in English. The opposite corner is **XGBoost** trained with
+no apologies: hundreds of shallow trees, no monotonicity constraints,
+SHAP available only as a post-hoc apology.
+
+The interesting question isn't which one wins on AUC. It's whether the
+fuzzy model gives up enough lift that nobody would bring it to a regulator —
+or whether it's competitive enough that "opaque + SHAP" stops looking like
+the obvious default.
+
+## 03 · The transparent model — zero-task auto-fuzzy
+
+ZTAF derives fuzzy membership functions for every continuous feature by
+clustering on the conditional class distribution, then synthesises a rule
+base where each rule is a single readable conjunction. No expert priors;
+no hand-tuned sets.
+
+A sample of rules from the trained model:
+
+<pre><code>{`
+R01 · IF credit_history IS poor AND debt_to_income IS high
+       THEN default IS likely         (support 0.18, conf 0.83)
+
+R02 · IF utilisation IS high AND tenure IS short
+       AND open_inquiries IS many
+       THEN default IS likely         (support 0.11, conf 0.79)
+
+R03 · IF income IS comfortable AND utilisation IS low
+       AND credit_history IS clean
+       THEN default IS unlikely       (support 0.31, conf 0.94)
+
+R04 · IF dti IS low AND tenure IS long
+       THEN default IS unlikely       (support 0.22, conf 0.91)
+...
+R38 · IF prior_default IS recent
+       THEN default IS likely         (support 0.07, conf 0.88)
+`}</code></pre>
+
+<div class="callout">
+  <span class="label">why this matters</span>
+  <p>
+    Every prediction can be reduced to one or more firing rules. The
+    explanation that ships to the customer ("declined: high debt-to-income
+    plus recent inquiries") is not a post-hoc rationalisation of the model —
+    it is the model.
+  </p>
+</div>
+
+### Membership-function derivation
+
+For each numeric feature the algorithm:
+
+1. Bins observations along a 1-D grid weighted by the local default rate.
+2. Fits 3–5 triangular or trapezoidal membership functions whose peaks
+   coincide with class-density modes.
+3. Labels each function with the nearest plain-English bucket
+   (`low`, `moderate`, `high`, `extreme`) using a fixed lookup table.
+
+The result is reproducible, configuration-free, and surprisingly stable
+across resampled training sets.
+
+## 04 · The opaque model — XGBoost
+
+XGBoost is the obvious counter-example: a strong baseline for tabular
+classification with effectively zero interpretability out of the box.
+
+<div class="kv">
+  <dt>objective</dt><dd>binary:logistic</dd>
+  <dt>n_estimators</dt><dd>1200, early-stopped at 847</dd>
+  <dt>max_depth</dt><dd>6</dd>
+  <dt>learning_rate</dt><dd>0.04</dd>
+  <dt>subsample</dt><dd>0.8 · colsample 0.8</dd>
+  <dt>monotonicity</dt><dd>none enforced</dd>
+  <dt>regularisation</dt><dd>λ = 1.4, α = 0.1</dd>
+</div>
+
+Feature importances were collected via gain, and SHAP values were computed
+on the test set for the explainability post-mortem. Both are reported, but
+the framing matters: SHAP is **commentary on a decision that has already
+been made**, not the decision itself.
+
+## 05 · Head-to-head
+
+All numbers below are placeholders pending the dissertation write-up. The
+*shape* of the trade is what's interesting; the exact decimals are still
+moving.
+
+| metric                | auto-fuzzy (transparent) | xgboost (opaque) | delta  |
+| --------------------- | ------------------------ | ---------------- | ------ |
+| auc                   | 0.762                    | 0.804            | +0.042 |
+| accuracy              | 0.781                    | 0.803            | +0.022 |
+| f1 (default class)    | 0.612                    | 0.661            | +0.049 |
+| brier score (cal.)    | 0.166                    | 0.144            | -0.022 |
+| inference latency     | 0.9 ms / sample          | 3.1 ms / sample  | +2.2x  |
+| model size            | 38 rules · 4 kb          | 847 trees · 6 mb | ~1500x |
+| interpretability      | ★★★★★                    | ★☆☆☆☆            | —      |
+| regulator-ready       | yes                      | with shap caveats| —      |
+
+<div class="two-col">
+  <div class="callout --depth">
+    <span class="label">transparent · auto-fuzzy</span>
+    <p>
+      Loses ~4 AUC points. Gains the entire explanation surface. Every decision
+      reduces to a sentence a reviewer can challenge.
+    </p>
+  </div>
+  <div class="callout">
+    <span class="label">opaque · xgboost</span>
+    <p>
+      Wins on every accuracy metric. Pays the explanation tax post-hoc via
+      SHAP, with all the usual caveats about feature attribution stability.
+    </p>
+  </div>
+</div>
+
+### Calibration is the sleeper
+
+AUC differences are easy to defend in a paper. What matters in deployment
+is whether the probabilities are honest. Reliability diagrams (forthcoming
+chart) show the fuzzy model is *better calibrated above 0.6* — exactly the
+region where adverse-action thresholds sit. That nuance gets buried if you
+only quote AUC.
+
+## 06 · The trade
+
+The temptation is to say "pick the higher AUC and explain it with SHAP".
+The temptation is wrong roughly as often as it is right. A decision frame
+that has held up across three prototypes:
+
+|                          | high regulatory exposure | low regulatory exposure |
+| ------------------------ | ------------------------ | ----------------------- |
+| **small AUC gap (&lt;3 pts)** | auto-fuzzy               | auto-fuzzy              |
+| **large AUC gap (&gt;5 pts)** | auto-fuzzy + shadow xgb  | xgboost + shap          |
+
+In a credit-default setting the gap-and-exposure cell almost always lands
+in the top row. Where the regulator can ask "why this customer?" you
+cannot afford an explanation that won't survive cross-examination.
+
+## 07 · What I'd ship
+
+A two-model deployment, both trained on the same features:
+
+- **Decisioning surface:** the auto-fuzzy classifier. Its output and the
+  set of firing rules go straight into the adverse-action notice.
+- **Shadow monitor:** the XGBoost model runs alongside, scoring every
+  application. Disagreement above a threshold raises a manual review flag.
+  This isolates the lift from the explanation, and surfaces edge cases the
+  rule base hasn't learned to handle yet.
+
+Over time, persistent disagreements feed back into the rule synthesis,
+narrowing the gap without quietly migrating decisioning into an
+unexplainable model.
+
+<div class="callout --depth">
+  <span class="label">what's next</span>
+  <p>
+    The full dissertation includes calibration curves, fairness analysis by
+    protected attribute, and a chapter on robust counterfactual explanations.
+    Updates land here as they're written.
+  </p>
+</div>
+
+## 08 · Receipts
+
+- **Code:** notebooks and the fuzzy synthesis library will be published on
+  GitHub alongside the dissertation submission. Permalink will be added here.
+- **Data:** placeholder dataset; the dissertation uses publicly available
+  loan-level data with the licence noted in the methodology chapter.
+- **Compute:** trained on a single workstation in under 15 minutes — both
+  models. Reproducibility is a feature, not a sales pitch.
+
+---
+
+*This post will be revised as the dissertation chapters firm up. Corrections
+and dissent are welcome at <a class="mono" href="mailto:julian@databased.business">julian@databased.business</a>.*

@@ -2,7 +2,20 @@
 import BaseHead from '../components/BaseHead.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import SectionRubric from '../components/SectionRubric.astro';
+import PostRow from '../components/PostRow.astro';
+import Sparkline from '../components/Sparkline.astro';
+import { SITE_TITLE, SITE_DESCRIPTION, AUTHOR } from '../consts';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const latest = posts.slice(0, 4);
+const featured = posts.find((p) => p.id.includes('credit-default')) ?? posts[0];
+
+const todayIso = new Date().toISOString().slice(0, 10);
 ---
 
 <!doctype html>
@@ -12,74 +25,304 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
   </head>
   <body>
     <Header />
-    <main>
-      <h1>Data, based in reality</h1>
+    <main id="main" data-testid="home-main">
 
-      <p>
-        databased.business is my studio for translating graduate-level research into tools that
-        operations teams can actually use. It is a promise to stay grounded in outcomes, not
-        dashboards for dashboards' sake.
-      </p>
+      {/* ─── HERO ─────────────────────────────────────────────────── */}
+      <section class="hero wrap" data-testid="hero">
+        <div class="rule-top" aria-hidden="true">
+          <span class="mono">log // {todayIso}</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="mono">julian elliott · msc data analytics</span>
+        </div>
 
-      <p>
-        I'm Julian Elliott, currently undertaking an <strong>MSc in Data Analytics</strong> at the
-        University of Huddersfield. My work interrogates how human-centred automation, robust data
-        governance, and accessible analytics can unlock compounding value inside real businesses.
-      </p>
+        <h1 class="display hero-title">
+          <span class="depth">transparent</span><span class="slash">&nbsp;/&nbsp;</span><span class="signal">opaque</span><span class="period">.</span>
+        </h1>
 
-      <h2>Grounded MSc research</h2>
-      <p>
-        The projects featured here are rooted in the questions driving my dissertation and applied
-        research practice:
-      </p>
-      <ul>
-        <li>
-          Optimising logistics and supply chains with streaming analytics that highlight wasted
-          miles before they compound.
-        </li>
-        <li>
-          Bringing large language models into business intelligence workflows without sacrificing
-          trust, transparency, or explainability.
-        </li>
-        <li>
-          Designing governance frameworks that let non-technical teams explore data safely and make
-          confident decisions.
-        </li>
-      </ul>
+        <p class="lead hero-lead">
+          Field notes on data, models, and what we can defend in plain English.
+          Built for engineers and analysts who want the maths shown — not summarised.
+        </p>
 
-      <h2>What to expect</h2>
-      <p>Upcoming posts will blend research, experimentation, and real-world application:</p>
-      <ul>
-        <li>
-          Research briefs that distil MSc findings into playbooks for analysts, operators, and
-          domain experts.
-        </li>
-        <li>
-          Hands-on walkthroughs from my homelab, covering automation stacks like n8n, containerised
-          services, and data ops pipelines.
-        </li>
-        <li>
-          Field notes on prototypes—dashboards, agents, and decision support tools—tested with
-          actual business scenarios.
-        </li>
-      </ul>
+        <div class="hero-meta">
+          <Sparkline values={[2,4,3,5,4,6,5,8,7,10,9,12]} width={120} height={22} />
+          <div class="kv hero-kv">
+            <dt>working on</dt><dd>credit-default modelling · auto-fuzzy vs xgboost</dd>
+            <dt>shipping in</dt><dd>astro / cloudflare workers</dd>
+            <dt>open to</dt><dd>collaboration, critique, coffee</dd>
+          </div>
+        </div>
+      </section>
 
-      <h2>Let's collaborate</h2>
-      <p>
-        Have a challenge that needs clearer data, faster insight, or a fresh automation idea?
-        Let's talk and see how we can build something grounded together.
-      </p>
-      <ul>
-        <li>
-          <a href="https://www.linkedin.com/in/julianelliott" target="_blank">Connect on LinkedIn</a>
-          for professional updates and collaboration requests.
-        </li>
-        <li>
-          <a href="https://github.com/Julian-Elliott" target="_blank">Explore the GitHub repos</a>
-          to review experiments, automations, and open-source tooling.
-        </li>
-      </ul>
+      {/* ─── 01 · FEATURED FIELD NOTE ─────────────────────────────── */}
+      {featured && (
+        <section class="wrap" data-testid="featured-section">
+          <SectionRubric idx="01" title="featured field note" meta="↘ latest" />
+          <a class="featured" href={`/blog/${featured.id}/`} data-testid="featured-link">
+            <div class="featured-left">
+              <span class="chip --signal">{featured.data.tag ?? 'field note'}</span>
+              <h2 class="featured-title">{featured.data.title}</h2>
+              <p class="featured-desc">{featured.data.description}</p>
+              <div class="featured-meta">
+                <span class="mono">read · {featured.data.readingTime ?? '—'}</span>
+                <span class="mono">→ {`/blog/${featured.id}`}</span>
+              </div>
+            </div>
+            <div class="featured-right" aria-hidden="true">
+              <Sparkline values={featured.data.spark ?? [4,3,5,4,7,6,9,8,11,10,13,12]} width={220} height={42} />
+            </div>
+          </a>
+        </section>
+      )}
+
+      {/* ─── 02 · INDEX OF SECTIONS ───────────────────────────────── */}
+      <section class="wrap" data-testid="taxonomy-section">
+        <SectionRubric idx="02" title="three surfaces" meta="↘ navigate" />
+        <div class="taxonomy">
+          <a href="/blog" class="surface" data-testid="surface-blog">
+            <span class="mono surf-idx">01 · field notes</span>
+            <h3 class="surf-h">Notebooks, papers,<br/>experiments.</h3>
+            <p class="surf-p muted">Long-form essays from the lab. Methodology in plain English; receipts in mono.</p>
+            <span class="surf-arrow">→</span>
+          </a>
+          <a href="/models" class="surface" data-testid="surface-models">
+            <span class="mono surf-idx">02 · renders</span>
+            <h3 class="surf-h">3D models<br/>I have made.</h3>
+            <p class="surf-p muted">Wireframes, prints, sims. Some shipped, some left as studies.</p>
+            <span class="surf-arrow">→</span>
+          </a>
+          <a href="/code" class="surface" data-testid="surface-code">
+            <span class="mono surf-idx">03 · shipped code</span>
+            <h3 class="surf-h">Recent software,<br/>straight from git.</h3>
+            <p class="surf-p muted">Live mirror of <span class="mono">github.com/julian-elliott</span>. Sorted by last push.</p>
+            <span class="surf-arrow">→</span>
+          </a>
+        </div>
+      </section>
+
+      {/* ─── 03 · RECENT NOTES ────────────────────────────────────── */}
+      <section class="wrap" data-testid="recent-section">
+        <SectionRubric idx="03" title="recent notes" meta={`↘ ${posts.length} total`} />
+        <div class="rows">
+          {latest.map((p, i) => (
+            <PostRow
+              href={`/blog/${p.id}/`}
+              idx={String(i + 1).padStart(2, '0')}
+              title={p.data.title}
+              description={p.data.description}
+              pubDate={p.data.pubDate}
+              readingTime={p.data.readingTime}
+              tag={p.data.tag}
+              spark={p.data.spark}
+            />
+          ))}
+        </div>
+        <p class="all-link">
+          <a href="/blog" data-testid="all-posts">see all field notes →</a>
+        </p>
+      </section>
+
+      {/* ─── 04 · MANIFESTO ───────────────────────────────────────── */}
+      <section class="wrap" data-testid="manifesto-section">
+        <SectionRubric idx="04" title="three axes" meta="↘ working principles" />
+        <div class="axes">
+          <article class="axis">
+            <span class="mono axis-num">x</span>
+            <h3>Show the working.</h3>
+            <p class="muted">Every claim ships with its data, code, and decisions. If the receipts won't load, the claim doesn't either.</p>
+          </article>
+          <article class="axis">
+            <span class="mono axis-num">y</span>
+            <h3>Prefer the model you can defend.</h3>
+            <p class="muted">Interpretability is not a vibe — it's a regulatory artefact. Opaque models earn their place by lift you can measure.</p>
+          </article>
+          <article class="axis">
+            <span class="mono axis-num">z</span>
+            <h3>Plain English is the deliverable.</h3>
+            <p class="muted">A model nobody can summarise is a model nobody owns. Data democracy starts with a single intelligible sentence.</p>
+          </article>
+        </div>
+      </section>
+
     </main>
     <Footer />
+
+    <style>
+      .hero {
+        padding: var(--s-5) var(--s-3) var(--s-4);
+      }
+      .rule-top {
+        display: flex;
+        align-items: center;
+        gap: var(--s-2);
+        font-family: var(--f-mono);
+        font-size: var(--t-mono);
+        color: var(--ink-3);
+        letter-spacing: 0.04em;
+        margin-bottom: var(--s-3);
+      }
+      .rule-top .dot {
+        width: 5px; height: 5px;
+        background: var(--signal);
+        border-radius: 50%;
+        animation: blink 2.4s steps(2) infinite;
+      }
+      @keyframes blink { 50% { opacity: 0.25; } }
+
+      .hero-title {
+        font-family: var(--f-display);
+        font-variation-settings: "opsz" 144, "SOFT" 40, "WONK" 1;
+        font-weight: 400;
+        letter-spacing: -0.04em;
+        margin: 0 0 var(--s-3) 0;
+        font-size: clamp(56px, 12vw, 144px);
+        line-height: 0.92;
+      }
+      .hero-title .slash { color: var(--ink-3); font-style: italic; }
+      .hero-title .period { color: var(--signal); }
+      .hero-title .depth { color: var(--depth); }
+      .hero-title .signal { color: var(--signal); font-style: italic; }
+
+      .hero-lead {
+        max-width: 56ch;
+        font-size: clamp(18px, 1.4vw, 22px);
+        color: var(--ink-2);
+        margin-bottom: var(--s-4);
+      }
+      .hero-meta {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: var(--s-3);
+        align-items: start;
+        padding: var(--s-2) 0;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+      .hero-kv { grid-template-columns: 120px 1fr; margin: 0; }
+      @media (max-width: 700px) {
+        .hero-meta { grid-template-columns: 1fr; }
+      }
+
+      /* featured */
+      .featured {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: var(--s-4);
+        align-items: center;
+        padding: var(--s-4) 0 var(--s-5);
+        color: var(--ink);
+        text-decoration: none;
+        transition: transform .2s ease;
+      }
+      .featured:hover { transform: translateY(-1px); }
+      .featured-title {
+        font-family: var(--f-display);
+        font-size: clamp(32px, 5vw, 56px);
+        font-variation-settings: "opsz" 144, "SOFT" 60, "WONK" 1;
+        line-height: 1.02;
+        margin: var(--s-2) 0 var(--s-2) 0;
+        max-width: 18ch;
+      }
+      .featured-desc { color: var(--ink-2); max-width: 60ch; margin-bottom: var(--s-2); }
+      .featured-meta {
+        display: flex; gap: var(--s-3);
+        font-family: var(--f-mono); font-size: var(--t-mono);
+        color: var(--ink-3);
+      }
+      .featured-right { color: var(--signal); }
+      .featured:hover .featured-title { color: var(--signal); }
+      @media (max-width: 800px) {
+        .featured { grid-template-columns: 1fr; }
+      }
+
+      /* taxonomy */
+      .taxonomy {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        margin-top: var(--s-3);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        overflow: hidden;
+        background: var(--bg-card);
+      }
+      .surface {
+        position: relative;
+        padding: var(--s-3);
+        color: var(--ink);
+        text-decoration: none;
+        border-right: 1px solid var(--rule);
+        transition: background-color .25s ease;
+        display: flex;
+        flex-direction: column;
+        gap: var(--s-1);
+        min-height: 200px;
+      }
+      .surface:last-child { border-right: 0; }
+      .surface:hover { background: color-mix(in srgb, var(--signal) 6%, transparent); }
+      .surface .surf-idx {
+        font-size: var(--t-mono);
+        color: var(--ink-3);
+        letter-spacing: 0.06em;
+      }
+      .surface .surf-h {
+        font-family: var(--f-display);
+        font-size: 26px;
+        line-height: 1.06;
+        font-variation-settings: "opsz" 30;
+        margin: 0;
+        color: var(--ink);
+      }
+      .surface .surf-p { font-size: 14.5px; margin: 0; }
+      .surface .surf-arrow {
+        position: absolute;
+        right: var(--s-3);
+        bottom: var(--s-3);
+        font-family: var(--f-mono);
+        font-size: 22px;
+        color: var(--ink-3);
+        transition: transform .2s ease, color .2s ease;
+      }
+      .surface:hover .surf-arrow { color: var(--signal); transform: translateX(4px); }
+      @media (max-width: 800px) {
+        .taxonomy { grid-template-columns: 1fr; }
+        .surface { border-right: 0; border-bottom: 1px solid var(--rule); }
+        .surface:last-child { border-bottom: 0; }
+      }
+
+      .rows { margin-top: var(--s-2); }
+      .all-link {
+        margin-top: var(--s-3);
+        font-family: var(--f-mono);
+        font-size: var(--t-mono);
+        color: var(--ink-2);
+      }
+      .all-link a:hover { color: var(--signal); }
+
+      /* axes */
+      .axes {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--s-4);
+        padding: var(--s-3) 0 var(--s-5);
+      }
+      .axis .axis-num {
+        font-size: 14px;
+        color: var(--signal);
+        letter-spacing: 0.1em;
+      }
+      .axis h3 {
+        font-family: var(--f-display);
+        font-size: 24px;
+        font-variation-settings: "opsz" 60;
+        margin: 4px 0 6px 0;
+        color: var(--ink);
+        line-height: 1.1;
+      }
+      .axis p { margin: 0; font-size: 15.5px; }
+      @media (max-width: 800px) {
+        .axes { grid-template-columns: 1fr; }
+      }
+    </style>
   </body>
 </html>

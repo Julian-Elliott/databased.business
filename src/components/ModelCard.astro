@@ -1,0 +1,135 @@
+---
+interface Props {
+  idx: string;
+  title: string;
+  medium: string;       // e.g. "Blender 4.2 / Cycles"
+  polys?: string;       // e.g. "184k tris"
+  year: string;         // e.g. "2025"
+  status?: string;      // e.g. "in progress"
+  caption?: string;
+}
+const { idx, title, medium, polys, year, status, caption } = Astro.props;
+
+// Deterministic placeholder pattern derived from the model title — a clever
+// wireframe-ish abstraction until real renders are dropped in.
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return h;
+}
+const seed = hashStr(title);
+function r(i: number) {
+  const x = Math.sin(seed + i * 9301) * 10000;
+  return x - Math.floor(x);
+}
+const cx = 200, cy = 130;
+const nodes = Array.from({ length: 18 }, (_, i) => {
+  const a = (i / 18) * Math.PI * 2;
+  const radius = 60 + r(i) * 70;
+  return [
+    +(cx + Math.cos(a) * radius).toFixed(1),
+    +(cy + Math.sin(a) * radius * 0.6).toFixed(1),
+  ];
+});
+const edges: [number, number][] = [];
+for (let i = 0; i < nodes.length; i++) {
+  for (let j = i + 1; j < nodes.length; j++) {
+    if (r(i * 31 + j) < 0.18) edges.push([i, j]);
+  }
+}
+---
+
+<article class="model-card" data-testid={`model-card-${idx}`}>
+  <figure class="render">
+    <svg viewBox="0 0 400 260" role="img" aria-label={`Placeholder wireframe for ${title}`}>
+      <defs>
+        <pattern id={`grid-${idx}`} width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.18" />
+        </pattern>
+      </defs>
+      <rect width="400" height="260" fill={`url(#grid-${idx})`} class="grid" />
+      <g class="edges">
+        {edges.map(([i, j]) => (
+          <line x1={nodes[i][0]} y1={nodes[i][1]} x2={nodes[j][0]} y2={nodes[j][1]} stroke="currentColor" stroke-width="0.6" opacity="0.5" />
+        ))}
+      </g>
+      <g class="nodes">
+        {nodes.map((n) => (
+          <circle cx={n[0]} cy={n[1]} r="1.6" fill="currentColor" />
+        ))}
+      </g>
+      <text x="14" y="22" class="frame-label">{`render // ${idx}`}</text>
+      <text x="386" y="22" text-anchor="end" class="frame-label">{medium}</text>
+      <text x="14" y="248" class="frame-label">{`${year}${status ? ` · ${status}` : ''}`}</text>
+      {polys && <text x="386" y="248" text-anchor="end" class="frame-label">{polys}</text>}
+    </svg>
+  </figure>
+
+  <header class="meta-row">
+    <span class="mono idx">{idx}</span>
+    <h3 class="title">{title}</h3>
+  </header>
+  {caption && <p class="caption">{caption}</p>}
+
+  <dl class="kv">
+    <dt>medium</dt><dd>{medium}</dd>
+    <dt>year</dt><dd>{year}</dd>
+    {polys && (<><dt>polys</dt><dd>{polys}</dd></>)}
+    {status && (<><dt>status</dt><dd>{status}</dd></>)}
+  </dl>
+</article>
+
+<style>
+  .model-card {
+    border: 1px solid var(--rule);
+    background: var(--bg-card);
+    padding: var(--s-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .model-card:hover {
+    border-color: var(--ink-2);
+    transform: translateY(-2px);
+  }
+  .render {
+    margin: 0;
+    border: 1px solid var(--rule-soft);
+    background: var(--paper);
+    aspect-ratio: 400/260;
+    overflow: hidden;
+    color: var(--depth);
+  }
+  .render svg { display: block; width: 100%; height: 100%; }
+  .frame-label {
+    font-family: var(--f-mono);
+    font-size: 9px;
+    fill: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+  .grid { color: var(--depth); }
+  .meta-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+  }
+  .meta-row .idx {
+    font-size: var(--t-mono);
+    color: var(--ink-3);
+  }
+  .title {
+    font-family: var(--f-display);
+    font-size: 22px;
+    font-variation-settings: "opsz" 30;
+    margin: 0;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .caption {
+    color: var(--ink-2);
+    font-size: 15px;
+    margin: 0;
+  }
+  .kv { grid-template-columns: 64px 1fr; margin-top: var(--s-1); }
+</style>

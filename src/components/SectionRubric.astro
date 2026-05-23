@@ -1,0 +1,16 @@
+---
+interface Props {
+  idx: string;
+  title: string;
+  meta?: string;
+  /** Anchor id for deep linking */
+  id?: string;
+}
+const { idx, title, meta, id } = Astro.props;
+---
+
+<header class="rubric" id={id} data-testid={`rubric-${idx}`}>
+  <span class="idx">{idx}</span>
+  <h2 class="title">{title}</h2>
+  {meta && <span class="meta">{meta}</span>}
+</header>

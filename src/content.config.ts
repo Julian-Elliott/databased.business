@@ -12,6 +12,11 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     heroImage: z.string().optional(),
+    tag: z.string().optional(),
+    readingTime: z.string().optional(),
+    // Tiny 12-point sparkline series rendered as a glyph for the post.
+    spark: z.array(z.number()).optional(),
+    draft: z.boolean().optional(),
   }),
 });
 

@@ -7,11 +7,18 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://example.com",
+  site: "https://databased.business",
   integrations: [mdx(), sitemap()],
   adapter: cloudflare({
     platformProxy: {
       enabled: true,
     },
   }),
+  // Vite dev-server tweaks (Emergent preview ingress + LAN access).
+  vite: {
+    server: {
+      host: "0.0.0.0",
+      allowedHosts: true,
+    },
+  },
 });

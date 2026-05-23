@@ -1,0 +1,9 @@
+{
+  "name": "databased-frontend-bridge",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Supervisor bridge that runs the Astro project located in the repo root (/app).",
+  "scripts": {
+    "start": "cd /app && exec npx astro dev --host 0.0.0.0 --port 3000"
+  }
+}

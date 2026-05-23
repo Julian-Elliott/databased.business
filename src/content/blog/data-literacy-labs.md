@@ -2,7 +2,9 @@
 title: "Data Literacy Labs That Stick"
 description: "How we structure recurring workshops so teams practice, not just attend, training."
 pubDate: "Jun 12 2024"
-heroImage: "/blog-placeholder-4.jpg"
+tag: "literacy"
+readingTime: "5 min"
+spark: [2, 3, 3, 5, 4, 6, 7, 6, 9, 8, 10, 12]
 ---
 
 The most common request I receive from partners is help designing data literacy programmes that actually change behaviour. The

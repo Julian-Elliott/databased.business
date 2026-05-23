@@ -2,7 +2,9 @@
 title: "Governance Without Gatekeeping"
 description: "Designing policies that encourage contribution while protecting sensitive data."
 pubDate: "May 02 2024"
-heroImage: "/blog-placeholder-3.jpg"
+tag: "governance"
+readingTime: "5 min"
+spark: [5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 11, 10]
 ---
 
 When people hear "data governance" they imagine the brakes being slammed on their projects. During interviews with civic

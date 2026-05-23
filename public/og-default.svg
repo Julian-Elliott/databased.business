@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0"/>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#cfc7b3" stroke-width="0.8"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#f4f1ea"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.5"/>
+  <rect width="1200" height="630" filter="url(#grain)" opacity="0.6"/>
+
+  <text x="60" y="80" font-family="IBM Plex Mono, monospace" font-size="20" fill="#6a6d78" letter-spacing="2">
+    databased.business · log 2026.01
+  </text>
+
+  <text x="60" y="320" font-family="Fraunces, serif" font-size="180" font-weight="400" letter-spacing="-6" fill="#0b3d4a">transparent</text>
+  <text x="60" y="490" font-family="Fraunces, serif" font-size="180" font-style="italic" font-weight="400" letter-spacing="-6" fill="#c2410c">/ opaque<tspan fill="#c2410c">.</tspan></text>
+
+  <text x="60" y="570" font-family="IBM Plex Sans, sans-serif" font-size="26" fill="#3a3c44">
+    field notes on data, models, and what we can defend in plain English
+  </text>
+
+  <line x1="60" y1="600" x2="1140" y2="600" stroke="#cfc7b3" stroke-width="1"/>
+  <text x="60" y="618" font-family="IBM Plex Mono, monospace" font-size="14" fill="#6a6d78">
+    julian elliott · msc data analytics · huddersfield
+  </text>
+</svg>
