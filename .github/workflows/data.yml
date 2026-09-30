@@ -1,0 +1,38 @@
+name: DS-001 data (NESO carbon intensity)
+
+on:
+  schedule:
+    - cron: "15 6 * * *"   # 06:15 UTC daily: yesterday's national actuals are published by then
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["scripts/fetch_neso.py"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ds001-data
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyarrow
+      - name: Fetch (backfill on the first run, resume afterwards)
+        run: python3 scripts/fetch_neso.py --out public/data/ds001
+      - name: Commit the release
+        run: |
+          git config user.name "ds001-pipeline"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/data/ds001
+          if ! git diff --cached --quiet; then
+            git commit -m "DS-001: NESO carbon intensity to $(date -u +%Y-%m-%d) (CC BY 4.0)"
+            git push
+          fi

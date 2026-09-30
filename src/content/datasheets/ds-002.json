@@ -1,0 +1,8 @@
+{"id":"ds-002","order":2,"title":"South Wales grid, by the half hour","summary":"Region 7 cut of DS-001 with the generation mix pivoted to columns, for the notebook’s local questions.","status":"released","revision":"2026-10-01","licence":"CC BY 4.0 · attribute NESO","source":"NESO Carbon Intensity API","sourceUrl":"https://api.carbonintensity.org.uk","coverage":"May 2018 → yesterday · region 7","cadence":"30 minutes","units":"gCO₂ per kWh · % of generation","formats":"Parquet · CSV from the explorer","refresh":"daily, with DS-001","dataDir":"/data/ds001/","curves":true,
+"kv":[["Period","May 2018 →"],["Cadence","30 min"],["Licence","CC BY 4.0"]],
+"schema":[{"field":"from, to","type":"timestamp (UTC)","description":"Settlement period."},{"field":"intensity_forecast, intensity_index","type":"int · enum","description":"As DS-001; regional, so forecast only."},{"field":"mix_gas, mix_wind, mix_solar, mix_nuclear, mix_biomass, mix_imports, mix_hydro, mix_coal, mix_other","type":"float (%)","description":"Forecast share of regional generation."}],
+"limits":[["A view, not a new source","DS-002 is DS-001 filtered to regionid = 7. Every limit of DS-001 applies."],["Forecast only","No measured regional intensity exists."]],
+"query":"SELECT time, intensity_forecast, intensity_index\nFROM   sample\nWHERE  region = 'sw' AND day = '2026-09-29'\nORDER  BY intensity_forecast LIMIT 5;","queryNote":"The five cleanest half hours of the notebook’s Monday.",
+"provenance":[["Derived from","DS-001 regional partitions, WHERE regionid = 7"],["Checks","Inherited from DS-001"]],
+"revisions":[["2026-10-01","v1 · first release, as a view of DS-001."]],
+"usedIn":[{"label":"Notebook sheet 02 · The grid, one Monday","href":"https://julian-elliott.github.io/#sheet-02"}]}

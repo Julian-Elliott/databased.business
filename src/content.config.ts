@@ -1,23 +1,39 @@
-import { glob } from "astro/loaders";
-import { defineCollection, z } from "astro:content";
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
-const blog = defineCollection({
-  // Load Markdown and MDX files in the `src/content/blog/` directory.
-  loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
-  // Type-check frontmatter using a schema
+// One datasheet per JSON file in src/content/datasheets/. The manifest that governs a release
+// (which columns may be public) lives with the data as public/data/<id>/datapackage.json; this
+// collection is the datasheet's editorial front: specs, limits, the typical query, revisions.
+const datasheets = defineCollection({
+  loader: glob({ pattern: '*.json', base: './src/content/datasheets' }),
   schema: z.object({
+    id: z.string(),
+    order: z.number(),
     title: z.string(),
-    description: z.string(),
-    // Transform string to Date object
-    pubDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    heroImage: z.string().optional(),
-    tag: z.string().optional(),
-    readingTime: z.string().optional(),
-    // Tiny 12-point sparkline series rendered as a glyph for the post.
-    spark: z.array(z.number()).optional(),
-    draft: z.boolean().optional(),
+    summary: z.string(),
+    status: z.enum(['released', 'sanitising', 'locating', 'cleaning', 'planned']),
+    revision: z.string().optional(),
+    licence: z.string().optional(),
+    source: z.string().optional(),
+    sourceUrl: z.string().optional(),
+    coverage: z.string().optional(),
+    cadence: z.string().optional(),
+    units: z.string().optional(),
+    formats: z.string().optional(),
+    refresh: z.string().optional(),
+    dataDir: z.string().optional(),
+    specs: z.array(z.tuple([z.string(), z.string()])).default([]),
+    schema: z.array(z.object({ field: z.string(), type: z.string(), description: z.string() })).default([]),
+    limits: z.array(z.tuple([z.string(), z.string()])).default([]),
+    query: z.string().optional(),
+    queryNote: z.string().optional(),
+    provenance: z.array(z.tuple([z.string(), z.string()])).default([]),
+    revisions: z.array(z.tuple([z.string(), z.string()])).default([]),
+    usedIn: z.array(z.object({ label: z.string(), href: z.string() })).default([]),
+    curves: z.boolean().default(false),
+    noRelease: z.string().optional(),
+    kv: z.array(z.tuple([z.string(), z.string()])).default([]),
   }),
 });
 
-export const collections = { blog };
+export const collections = { datasheets };

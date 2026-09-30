@@ -1,0 +1,5 @@
+{"id":"ds-006","order":6,"title":"Food price inflation, by country","summary":"World Bank real-time food price monitoring, cleaned and joined for a coursework analysis.","status":"cleaning","coverage":"snapshot 2023-10-02","cadence":"monthly","licence":"CC BY 4.0 · attribute the World Bank",
+"kv":[["Snapshot","2023-10-02"],["Rows","[rows]"],["Licence","CC BY 4.0"]],
+"noRelease":"Cleaned CSVs exist · datasheet not written",
+"limits":[["Modelled coverage","The source models prices where markets are unobserved; check number_of_markets_modeled before trusting a country."]],
+"revisions":[["[date]","v1 · first release."]]}

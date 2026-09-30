@@ -1,0 +1,5 @@
+{"id":"ds-005","order":5,"title":"One solar panel, metered","summary":"Voltage, current and power from an INA228 monitor on a small panel, with plausibility flags.","status":"locating","coverage":"[dates]","cadence":"[s]","licence":"[TBD]",
+"kv":[["Period","[dates]"],["Cadence","[s]"],["Licence","[TBD]"]],
+"noRelease":"Data lives on the collector, not in the repo",
+"limits":[["Uncalibrated","Readings are from a hobby sensor without a calibration record; treat absolute values as indicative."]],
+"revisions":[["[date]","v1 · first release."]]}

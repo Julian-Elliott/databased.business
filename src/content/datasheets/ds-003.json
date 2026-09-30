@@ -1,0 +1,6 @@
+{"id":"ds-003","order":3,"title":"Household heating, two dwellings","summary":"Flow, return and room temperatures with outdoor weather, and boiler state where it was recorded, over a heating year.","status":"sanitising","coverage":"Nov 2025 → Aug 2026","cadence":"[cadence]","licence":"[TBD]",
+"kv":[["Period","Nov 2025 → Aug 2026"],["Cadence","[cadence]"],["Licence","[TBD]"]],
+"noRelease":"No public release yet · identifiers and location being removed",
+"limits":[["What will be released","Thermal series only: flow, return, room and outdoor temperatures, boiler state where recorded. Identifiers stripped. Location coarsened to about 10 km and weather refetched at that point. No phone, person or zone entities. Supplier consumption daily, not half-hourly, so occupancy isn’t readable."],["Consent","The second dwelling is released only with its household’s consent."],["Raw stays private","Captures never enter the repository. A manifest names the columns a release may contain; a script builds the public files from it."]],
+"revisions":[["[date]","v1 · first release, after the write-up."]],
+"usedIn":[{"label":"Notebook sheet 03 · The heating has two seasons","href":"https://julian-elliott.github.io/#sheet-03"}]}

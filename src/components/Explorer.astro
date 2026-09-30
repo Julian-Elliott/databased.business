@@ -1,0 +1,97 @@
+---
+// Typical application: a query that runs in the visitor's browser with DuckDB-WASM against the release files.
+// Nothing leaves the browser. Files come from datapackage.json so the panel picks up new partitions by itself.
+interface Props { id: string; dataDir: string; query: string; note?: string }
+const { id, dataDir, query, note } = Astro.props;
+---
+<div class="explorer" id="explore" data-dir={dataDir} data-ds={id}>
+  <label class="sr-only" for="sql">SQL</label>
+  <textarea class="code" id="sql" spellcheck="false" rows="6">{query}</textarea>
+  <div style="display: flex; gap: 10px; margin: 12px 0 14px; flex-wrap: wrap; align-items: center">
+    <button type="button" class="pill solid" id="run">Run in browser</button>
+    <button type="button" class="pill" id="csv" disabled>Download result as CSV</button>
+    <span class="status-line" id="status">Loads DuckDB-WASM on first run (~5 MB, cached by your browser).</span>
+  </div>
+  <div class="result" id="result" aria-live="polite"></div>
+  <p class="status-line" id="tables"></p>
+  {note && <p class="figcap">{note}</p>}
+</div>
+
+<script>
+  const root = document.getElementById('explore')!;
+  const dir = root.dataset.dir!;
+  const sql = document.getElementById('sql') as HTMLTextAreaElement;
+  const run = document.getElementById('run') as HTMLButtonElement;
+  const csvBtn = document.getElementById('csv') as HTMLButtonElement;
+  const status = document.getElementById('status')!;
+  const result = document.getElementById('result')!;
+  const tablesEl = document.getElementById('tables')!;
+  let db: any = null, conn: any = null, lastRows: any[] = [], lastCols: string[] = [];
+
+  async function boot() {
+    if (conn) return;
+    status.textContent = 'Loading DuckDB-WASM…';
+    const url = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm'; // pinned; ES module build
+    const duckdb: any = await import(/* @vite-ignore */ url);
+    const bundles = duckdb.getJsDelivrBundles();
+    const bundle = await duckdb.selectBundle(bundles);
+    const workerUrl = URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' }));
+    const worker = new Worker(workerUrl);
+    db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(duckdb.LogLevel.WARNING), worker);
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    conn = await db.connect();
+    // Register every Parquet resource in the manifest as a view; partitions of one kind become one table.
+    status.textContent = 'Reading datapackage.json…';
+    const dp = await fetch(`${dir}datapackage.json`).then((r) => r.json());
+    const groups: Record<string, string[]> = {};
+    for (const r of dp.resources || []) {
+      if (r.format !== 'parquet') continue;
+      const kind = r.path.includes('/') ? r.path.split('/')[0] : r.name;
+      const bytes = await fetch(`${dir}${r.path}`).then((x) => x.arrayBuffer());
+      await db.registerFileBuffer(r.path, new Uint8Array(bytes));
+      (groups[kind] ||= []).push(r.path);
+    }
+    const names: string[] = [];
+    for (const [kind, paths] of Object.entries(groups)) {
+      const name = kind === 'sample_days' ? 'sample' : kind === 'national_daily_means' ? 'daily' : kind;
+      await conn.query(`CREATE OR REPLACE VIEW "${name}" AS SELECT * FROM read_parquet([${paths.map((p) => `'${p}'`).join(', ')}])`);
+      names.push(`${name} (${paths.length} file${paths.length === 1 ? '' : 's'})`);
+    }
+    tablesEl.textContent = `Tables: ${names.join(' · ')}`;
+    status.textContent = 'Ready.';
+  }
+
+  function render(cols: string[], rows: any[]) {
+    const esc = (v: any) => String(v ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]!));
+    const fmt = (v: any) => (v instanceof Date ? v.toISOString().replace('T', ' ').slice(0, 16) : typeof v === 'bigint' ? v.toString() : v);
+    result.innerHTML = `<table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0, 500).map((r) => `<tr>${cols.map((c) => `<td>${esc(fmt(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+
+  run.addEventListener('click', async () => {
+    run.disabled = true;
+    try {
+      await boot();
+      const t0 = performance.now();
+      const res = await conn.query(sql.value);
+      lastCols = res.schema.fields.map((f: any) => f.name);
+      lastRows = res.toArray().map((r: any) => r.toJSON());
+      render(lastCols, lastRows);
+      status.textContent = `${lastRows.length} row${lastRows.length === 1 ? '' : 's'} · ${Math.round(performance.now() - t0)} ms · in your browser${lastRows.length > 500 ? ' · showing the first 500' : ''}`;
+      csvBtn.disabled = lastRows.length === 0;
+    } catch (e: any) {
+      status.textContent = `Error: ${e?.message || e}`;
+      result.innerHTML = '';
+    } finally {
+      run.disabled = false;
+    }
+  });
+
+  csvBtn.addEventListener('click', () => {
+    const q = (v: any) => { const s = v instanceof Date ? v.toISOString() : String(v ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const csv = [lastCols.join(','), ...lastRows.map((r) => lastCols.map((c) => q(r[c])).join(','))].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `${root.dataset.ds}-query-result.csv`;
+    a.click();
+  });
+</script>

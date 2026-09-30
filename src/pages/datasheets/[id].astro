@@ -1,0 +1,136 @@
+---
+import Base from '../../layouts/Base.astro';
+import Explorer from '../../components/Explorer.astro';
+import { getCollection } from 'astro:content';
+import summary from '../../../public/data/ds001/summary.json';
+
+export async function getStaticPaths() {
+  const sheets = await getCollection('datasheets');
+  return sheets.map((s) => ({ params: { id: s.data.id }, props: { sheet: s.data } }));
+}
+const { sheet } = Astro.props;
+const CHIP: Record<string, string> = { released: 'chip ok', sanitising: 'chip warm', locating: 'chip', cleaning: 'chip', planned: 'chip' };
+const RAMP: Record<string, string> = { 'very low': '#DCE9EE', low: '#A9C9D5', moderate: '#6FA1B4', high: '#3B7690', 'very high': '#1E4A5E' };
+const daily = summary.daily as { d: string; v: number }[];
+const swDay = summary.days.sw.example as { t: string; v: number; i: string }[];
+const dmax = Math.max(...daily.map((d) => d.v)), dmin = Math.min(...daily.map((d) => d.v));
+const dmean = Math.round(daily.reduce((a, d) => a + d.v, 0) / daily.length);
+const iMax = daily.findIndex((d) => d.v === dmax), iMin = daily.findIndex((d) => d.v === dmin);
+const fmt = (d: string) => new Date(d + 'T00:00Z').toLocaleString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const months = Array.from(new Set(daily.map((d) => d.d.slice(0, 7)))).map((m) => new Date(m + '-01T00:00Z').toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }));
+const swMin = swDay.reduce((a, h) => (h.v < a.v ? h : a)), swMax = swDay.reduce((a, h) => (h.v > a.v ? h : a));
+const id = sheet.id.toUpperCase();
+const specsLeft: [string, string][] = [['Source', sheet.source ? `${sheet.source}${sheet.sourceUrl ? ` (${sheet.sourceUrl.replace('https://', '')})` : ''}` : '—'], ['Licence', sheet.licence || '—'], ['Coverage', sheet.coverage || '—'], ['Cadence', sheet.cadence || '—'], ['Units', sheet.units || '—']];
+const specsRight: [string, string][] = [['Formats', sheet.formats || '—'], ['Refresh', sheet.refresh || '—'], ['Revision', sheet.revision || '—'], ['Status', sheet.status]];
+---
+<Base title={`${id} · ${sheet.title} — databased.business`} description={sheet.summary}>
+<div class="wrap sheetwrap">
+  <article class="dsheet" aria-labelledby="dst">
+    <div class="rh"><span class="mono">databased.business · Datasheet</span><span class="mono">{id}{sheet.revision ? ` · Rev ${sheet.revision}` : ''}</span></div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap">
+      <div style="flex: 1 1 380px; min-width: 0">
+        <div class="mono" style="font-size: 13px; color: var(--accent); margin-bottom: 10px">{id}</div>
+        <h1 id="dst" class="display h2x" style="font-size: 44px">{sheet.title}.</h1>
+        <p style="font-size: 17px; color: var(--ink-2); margin-top: 12px">{sheet.summary}</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end">
+        <span class={CHIP[sheet.status]}>{sheet.status}</span>
+        {sheet.licence && <span class="chip">{sheet.licence.split(' · ')[0]}</span>}
+      </div>
+    </div>
+
+    {sheet.noRelease && <div class="nodata" style="height: auto; padding: 18px; margin-top: 24px; border: 1px dashed #B9B3A6"><span class="mono">{sheet.noRelease}</span></div>}
+
+    <div class="sec">Key specifications<span>as released</span></div>
+    <div class="two" style="gap: 0 28px">
+      <table class="spec"><tbody>{specsLeft.map(([k, v]) => <tr><th>{k}</th><td>{v}</td></tr>)}</tbody></table>
+      <table class="spec"><tbody>{specsRight.map(([k, v]) => <tr><th>{k}</th><td class="c">{v}</td></tr>)}</tbody></table>
+    </div>
+
+    {sheet.curves && (
+      <>
+        <div class="sec">Characteristic curves<span>Fig. 1–2 · built {summary.built.slice(0, 10)}</span></div>
+        <figure style="margin: 0 0 22px">
+          <div class="fig-h"><span class="mono ink">Fig. 1 · National daily mean, {months[0]} {daily[0].d.slice(2, 4)} → {months[months.length - 1]} {daily[daily.length - 1].d.slice(2, 4)}</span><span class="mono">gCO₂/kWh</span></div>
+          <div class="chart">
+            <div class="axis y" style="height: 150px"><span>270</span><span>180</span><span>90</span><span>0</span></div>
+            <div class="plot">
+              <div class="bars" style="height: 150px">
+                {daily.map((d) => <div class="bar" style={`height:${Math.round((d.v / 270) * 100)}%;background:var(--accent);opacity:.9`} title={`${d.d} · ${d.v}`}></div>)}
+                <div style={`position:absolute;left:0;right:0;top:${Math.round((1 - dmean / 270) * 100)}%;border-top:1px dashed var(--signal)`}></div>
+                <span class="mono callout" style={`right:0;top:${Math.round((1 - dmean / 270) * 100) - 8}%;background:var(--sheet);padding:0 4px`}>mean {dmean}</span>
+                <span class="mono callout" style={`left:${Math.min(80, (iMax / daily.length) * 100).toFixed(1)}%;top:-2px`}>{dmax} · {fmt(daily[iMax].d)}</span>
+                <span class="mono callout" style={`left:${Math.min(80, (iMin / daily.length) * 100).toFixed(1)}%;top:108px`}>{dmin} · {fmt(daily[iMin].d)}</span>
+              </div>
+              <div class="axis x">{months.map((m) => <span>{m}</span>)}</div>
+            </div>
+          </div>
+          <figcaption class="figcap"><b>{daily.length} days, one column each.</b> Daily mean of the national half-hourly series (measured where published, forecast otherwise). Refreshed by the pipeline; the first release used NESO's stats endpoint, whose 30-day windows skip six month-end days.</figcaption>
+        </figure>
+        <figure style="margin: 0">
+          <div class="fig-h"><span class="mono ink">Fig. 2 · South Wales (region 7), half-hourly forecast, {summary.days.exampleDate}</span><span class="mono">gCO₂/kWh</span></div>
+          <div class="chart">
+            <div class="axis y" style="height: 110px"><span>400</span><span>200</span><span>0</span></div>
+            <div class="plot">
+              <div class="bars" style="height: 110px">
+                {swDay.map((h) => <div class="bar" style={`height:${Math.round((h.v / 400) * 100)}%;background:${RAMP[h.i]}`} title={`${h.t} · ${h.v} g/kWh · ${h.i}`}></div>)}
+              </div>
+              <div class="axis x"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+            </div>
+          </div>
+          <figcaption class="figcap">Shaded by NESO's index band, very low (lightest) to very high. Minimum {swMin.v} g at {swMin.t}, maximum {swMax.v} g at {swMax.t}. The notebook's <a href="https://julian-elliott.github.io/#sheet-02">sheet 02</a> reads this day.</figcaption>
+        </figure>
+      </>
+    )}
+
+    {sheet.schema.length > 0 && (
+      <>
+        <div class="sec">Pinout · schema<span>one row per settlement period</span></div>
+        <table class="tbl small">
+          <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>{sheet.schema.map((f) => <tr><td class="c">{f.field}</td><td class="c">{f.type}</td><td>{f.description}</td></tr>)}</tbody>
+        </table>
+      </>
+    )}
+
+    {sheet.limits.length > 0 && (
+      <>
+        <div class="sec">Absolute maximum ratings · known limits<span>read before use</span></div>
+        <table class="tbl small lim">
+          <thead><tr><th>Limit</th><th>Consequence</th></tr></thead>
+          <tbody>{sheet.limits.map(([k, v]) => <tr><td>{k}</td><td>{v}</td></tr>)}</tbody>
+        </table>
+      </>
+    )}
+
+    {sheet.query && sheet.dataDir && (
+      <>
+        <div class="sec">Typical application<span>DuckDB, runs in your browser</span></div>
+        <Explorer id={sheet.id} dataDir={sheet.dataDir} query={sheet.query} note={sheet.queryNote} />
+        <div class="sec" id="download">Download<span>files are the release; the site is the label</span></div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap" id="downloads">
+          <a class="pill" href={`${sheet.dataDir}datapackage.json`}>datapackage.json</a>
+          <a class="pill" href={`${sheet.dataDir}checks.log`}>checks.log</a>
+          <a class="pill" href={`${sheet.dataDir}sample_days.parquet`}>sample_days.parquet</a>
+          <a class="pill" href={`${sheet.dataDir}national_daily_means.parquet`}>national_daily_means.parquet</a>
+        </div>
+        <p class="figcap">Yearly and monthly partitions (national/, regional/) are listed in datapackage.json once the pipeline has run; the explorer registers them automatically.</p>
+      </>
+    )}
+
+    <div class="two" style="gap: 0 28px">
+      <div>
+        {sheet.provenance.length > 0 && (<><div class="sec">Provenance</div><table class="spec"><tbody>{sheet.provenance.map(([k, v]) => <tr><th>{k}</th><td>{v}</td></tr>)}</tbody></table></>)}
+        {sheet.usedIn.length > 0 && (<><div class="sec">Used in</div><table class="spec"><tbody>{sheet.usedIn.map((u) => <tr><th>Notebook</th><td><a href={u.href}>{u.label}</a></td></tr>)}</tbody></table></>)}
+      </div>
+      <div>
+        <div class="sec">Revision history</div>
+        <table class="spec"><tbody>{sheet.revisions.map(([k, v]) => <tr><th>{k}</th><td>{v}</td></tr>)}</tbody></table>
+        {sheet.status === 'released' && (<><div class="sec">Cite as</div><p style="font-size: 13.5px; color: var(--ink-2)">Elliott, J. (2026). <i>{id} {sheet.title}</i> [data set], databased.business{sheet.revision ? `, rev ${sheet.revision}` : ''}.{sheet.source ? ` Derived from ${sheet.source}, ${sheet.licence?.split(' · ')[0]}.` : ''}</p></>)}
+      </div>
+    </div>
+
+    <div class="sf"><span class="mono">databased.business · Data, based in reality</span><a class="mono" href="/#shelf">← Back to the shelf</a></div>
+  </article>
+</div>
+</Base>

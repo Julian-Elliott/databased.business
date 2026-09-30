@@ -1,0 +1,47 @@
+{
+  "id": "ds-001",
+  "order": 1,
+  "title": "GB electricity carbon intensity",
+  "summary": "Half-hourly carbon intensity of electricity for Great Britain and its seventeen distribution regions, with the forecast generation mix. Republished from NESO’s Carbon Intensity API as flat files you can query without an API key.",
+  "status": "released",
+  "revision": "2026-10-01",
+  "licence": "CC BY 4.0 · attribute NESO",
+  "source": "NESO Carbon Intensity API",
+  "sourceUrl": "https://api.carbonintensity.org.uk",
+  "coverage": "May 2018 → yesterday · national + 17 regions",
+  "cadence": "30 minutes (settlement periods, UTC)",
+  "units": "gCO₂ per kWh delivered",
+  "formats": "Parquet · datapackage.json · CSV from the explorer",
+  "refresh": "daily 06:15 UTC · scripts/fetch_neso.py",
+  "dataDir": "/data/ds001/",
+  "curves": true,
+  "kv": [["Period", "May 2018 →"], ["Cadence", "30 min"], ["Licence", "CC BY 4.0"]],
+  "schema": [
+    {"field": "from, to", "type": "timestamp (UTC)", "description": "Start and end of the 30-minute settlement period, ISO 8601."},
+    {"field": "intensity_forecast", "type": "int", "description": "Forecast intensity, gCO₂/kWh."},
+    {"field": "intensity_actual", "type": "int · nullable", "description": "Measured intensity. National file only; null for every regional row."},
+    {"field": "intensity_index", "type": "enum", "description": "NESO band: very low · low · moderate · high · very high."},
+    {"field": "regionid, shortname, dnoregion", "type": "int · text", "description": "Regional file only. 1–17; e.g. 7 = South Wales, WPD South Wales."},
+    {"field": "mix_biomass … mix_wind", "type": "float (%)", "description": "Regional file only. Forecast generation share for nine fuels: biomass, coal, imports, gas, nuclear, other, hydro, solar, wind."}
+  ],
+  "limits": [
+    ["Regional values are forecasts", "There is no measured regional intensity. Do not describe a regional figure as observed."],
+    ["Model output, not metered emissions", "NESO estimates intensity from the generation mix. A number here is a modelled estimate with its own error: on 29 Sep 2026 the national forecast missed the measured value by 12 g/kWh on average."],
+    ["Index bands change", "NESO revises what counts as “low”. Treat the numbers as the stable field and the labels as commentary."],
+    ["Average, not marginal", "This is the average intensity of everything generating. The emissions caused by adding a load depend on the marginal plant, usually gas, and are not in this dataset."],
+    ["Grid, not house", "Nothing in this dataset says what any building actually consumed or when."]
+  ],
+  "query": "SELECT date_trunc('hour', \"from\") AS hour,\n       round(avg(intensity_forecast)) AS g_per_kwh\nFROM   sample\nWHERE  region = 'sw' AND day = '2026-09-29'\nGROUP BY 1 ORDER BY 2 LIMIT 3;",
+  "queryNote": "Runs in your browser with DuckDB-WASM against the files listed in datapackage.json; nothing is sent to a server. Until the first pipeline run the tables are the sample days; afterwards the yearly and monthly partitions are registered too.",
+  "provenance": [
+    ["Fetched", "scripts/fetch_neso.py · GitHub Actions, daily · commit recorded in checks.log"],
+    ["Endpoints", "/intensity/{from}/{to} · /regional/intensity/{from}/{to} · 14-day windows"],
+    ["Transform", "Flattened JSON → one row per period; generation mix pivoted to columns. Values as served."],
+    ["Checks", "Row counts, missing periods, nulls, value ranges; results in checks.log and on this page."]
+  ],
+  "revisions": [
+    ["2026-10-01", "v1 · first release: sample days (29–30 Sep 2026, South Wales and GB) and 12 months of national daily means; full partitions arrive with the first scheduled fetch."],
+    ["[date]", "[next change, and what it breaks]"]
+  ],
+  "usedIn": [{"label": "Notebook sheet 02 · The grid, one Monday", "href": "https://julian-elliott.github.io/#sheet-02"}]
+}

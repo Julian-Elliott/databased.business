@@ -1,126 +1,48 @@
-# databased.business
+# databased.business — datasets, published as datasheets
 
-> Field notes on data, models, and what we can defend in plain English.
+> Data, based in reality.
 
-Personal site for Julian Elliott — currently reading an MSc in Data Analytics
-at the University of Huddersfield. The site is organised around a single
-animating tension: **transparent** models versus **opaque** ones, and the
-case work in between.
+Datasets Julian Elliott collected, cleaned or rebuilt, each with a **datasheet** in the electronics sense:
+key specifications, characteristic curves, pinout (schema), absolute maximum ratings (known limits),
+a typical application (a query that runs in your browser), provenance, and a revision history.
 
-Built with [Astro 5](https://astro.build) and deployed to
-[Cloudflare Workers](https://workers.cloudflare.com). A `git push` to `main`
-updates the live site.
+Built with [Astro 5](https://astro.build), deployed to [Cloudflare Workers](https://workers.cloudflare.com)
+as static assets. A `git push` to `main` updates the live site.
 
-## Surfaces
+## Layout
 
 ```
-00  index            /                  taxonomy + manifesto
-01  field notes      /blog              long-form essays
-02  renders          /models            3D modelling catalogue
-03  shipped code     /code              live mirror of github.com/Julian-Elliott
+src/content/datasheets/*.json   the datasheets (editorial front: specs, limits, query, revisions)
+public/data/<id>/               the releases: Parquet partitions, datapackage.json, checks.log, summary.json
+scripts/fetch_neso.py           DS-001 pipeline (NESO carbon intensity), run daily by .github/workflows/data.yml
+scripts/build_sample.py         the DS-001 seed release built from data fetched 30 Sep 2026
+src/pages/                      / (the shelf) and /datasheets/<id>/
+src/components/Explorer.astro   DuckDB-WASM query panel; nothing leaves the browser
 ```
 
-The flagship field note is
-[*Transparent vs Opaque: Predicting Credit Default with Zero-Task Auto-Fuzzy
-and XGBoost*](src/content/blog/transparent-vs-opaque-credit-default.mdx) — a
-side-by-side investigation of an interpretable fuzzy rule system against
-gradient boosted trees, drawn from MSc research.
+## How a release happens
 
-## Stack
+1. **Raw stays private.** Captures, exports and API pulls live on Julian's machine, never in this repository.
+2. **The manifest decides.** `datapackage.json` names every column a release may carry, its type, unit and licence.
+3. **Checks run in public.** Row counts, gaps, nulls and ranges run on the built files; results are in `checks.log`
+   and on the datasheet.
+4. **Files are the release.** Parquet with a revision date. The datasheet is the label on the tin, not the tin.
 
-- **Framework**: Astro 5 (MDX content collections)
-- **Adapter**: `@astrojs/cloudflare`
-- **Type system**: TypeScript (strict)
-- **Typography**: Fraunces (display) · IBM Plex Sans (body) · IBM Plex Mono
-- **Palette**: cream paper, deep ink, signal orange, petrol blue
-- **Data**: GitHub REST API for `/code` at build time; static MDX for posts
+## DS-001 pipeline
 
-## Local development
+`.github/workflows/data.yml` runs `scripts/fetch_neso.py` daily. The first run backfills from 11 May 2018
+(about 440 API calls, 14-day windows) and commits yearly partitions plus monthly ones for the current year;
+later runs refetch only the current partition. Partitions are small on purpose: git-friendly, and DuckDB-WASM
+loads only what a query needs. If the data ever outgrows the repository, point the workflow at an R2 bucket
+and keep the same paths.
 
-```bash
+## Develop
+
+```sh
 npm install
-npm run dev    # http://localhost:4321 (or 3000 if started via /app/frontend bridge)
+npm run dev                      # http://localhost:4321
+python3 scripts/build_sample.py  # rebuild the DS-001 seed files (needs pyarrow)
+npm run build && npx wrangler dev
 ```
 
-## Build & deploy
-
-```bash
-npm run build           # static prerender → dist/
-npm run deploy          # astro build && wrangler deploy
-```
-
-## Authoring
-
-New field note:
-
-```bash
-$ touch src/content/blog/<slug>.mdx
-```
-
-Frontmatter contract:
-
-```yaml
----
-title: "..."
-description: "..."
-pubDate: "Jan 18 2026"
-tag: "credit-default"      # optional, drives the filter chips
-readingTime: "14 min"      # optional
-spark: [4, 5, 4, 7, ...]   # optional 12-point sparkline glyph
-draft: false               # optional
----
-```
-
-Real 3D render images drop into `/public/models/<slug>.{jpg,webp}` and the
-matching entry in `src/data/models.ts` flips `placeholder: false` and gains
-an `image` field. Until then, each card shows an algorithmic wireframe
-derived deterministically from its title.
-
-## Project structure
-
-```
-src/
-  components/   header, footer, post row, repo card, model card, sparkline, rubric
-  content/blog/ MDX field notes
-  data/         models.ts (3D catalogue)
-  layouts/      BlogPost.astro
-  lib/          github.ts, stripe.ts (direct-fetch wrapper), products.ts (SKU catalogue)
-  pages/        index (= field notes), blog/[slug], models/, code/, shop/, api/checkout(.ts), api/checkout-status/[id]
-  styles/       global.css (full design system)
-  consts.ts     site title, sections (4 surfaces), author profile links
-```
-
-## Shop / Stripe
-
-`/shop` sells a single t-shirt (`tee-transparent-opaque`, £28 GBP).
-Checkout is implemented as Astro server endpoints (`src/pages/api/checkout.ts`
-and `src/pages/api/checkout-status/[session_id].ts`) that compile to
-Cloudflare Worker functions on deploy. No external backend required.
-
-To go live with your own Stripe account:
-
-```bash
-# put your real key into the live Worker
-wrangler secret put STRIPE_API_KEY
-
-# locally:
-cp .dev.vars.example .dev.vars        # then edit
-# or set STRIPE_API_KEY in /app/.env
-```
-
-The product catalogue lives in `src/lib/products.ts` — change the price,
-shipping rates, or SKU there. Prices are server-side only; the client
-never sends an amount.
-
-## Principles
-
-- **Show the working.** Every claim ships with its data, code, and decisions.
-- **Prefer the model you can defend.** Interpretability is a regulatory artefact, not a vibe.
-- **Plain English is the deliverable.** A model nobody can summarise is a model nobody owns.
-
-## Contact
-
-- Email: [julian@databased.business](mailto:julian@databased.business)
-- LinkedIn: [julianelliott](https://www.linkedin.com/in/julianelliott)
-- GitHub: [Julian-Elliott](https://github.com/Julian-Elliott)
-- Bluesky: [databased.business](https://bsky.app/profile/databased.business)
+Data licence: DS-001 derives from the NESO Carbon Intensity API (https://api.carbonintensity.org.uk), CC BY 4.0.

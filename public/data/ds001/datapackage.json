@@ -1,0 +1,98 @@
+{
+  "name": "ds-001-gb-electricity-carbon-intensity",
+  "title": "DS-001 GB electricity carbon intensity",
+  "version": "1.0.0",
+  "homepage": "https://databased.business/datasheets/ds-001/",
+  "licenses": [
+    {
+      "name": "CC-BY-4.0",
+      "path": "https://creativecommons.org/licenses/by/4.0/",
+      "title": "Creative Commons Attribution 4.0"
+    }
+  ],
+  "sources": [
+    {
+      "title": "NESO Carbon Intensity API",
+      "path": "https://api.carbonintensity.org.uk"
+    }
+  ],
+  "contributors": [
+    {
+      "title": "Julian Elliott",
+      "role": "publisher"
+    }
+  ],
+  "created": "2026-09-30T23:13:52Z",
+  "resources": [
+    {
+      "name": "sample_days",
+      "path": "sample_days.parquet",
+      "format": "parquet",
+      "bytes": 3882,
+      "description": "Four day-series used by the notebook: South Wales (regionid 7, forecast) and GB national (forecast + actual), 29 and 30 September 2026.",
+      "schema": {
+        "fields": [
+          {
+            "name": "region",
+            "type": "string",
+            "description": "sw = South Wales (regionid 7), gb = national"
+          },
+          {
+            "name": "regionid",
+            "type": "integer"
+          },
+          {
+            "name": "day",
+            "type": "string"
+          },
+          {
+            "name": "time",
+            "type": "string",
+            "description": "HH:MM UTC, period start"
+          },
+          {
+            "name": "from",
+            "type": "datetime",
+            "description": "period start, UTC"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "integer",
+            "unit": "gCO2/kWh"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "integer",
+            "unit": "gCO2/kWh",
+            "description": "national only; null where NESO has not published"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string",
+            "description": "NESO band"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_daily_means",
+      "path": "national_daily_means.parquet",
+      "format": "parquet",
+      "bytes": 2688,
+      "description": "Daily mean of the national half-hourly intensity, from NESO's stats endpoint, October 2025 to September 2026.",
+      "schema": {
+        "fields": [
+          {
+            "name": "date",
+            "type": "date"
+          },
+          {
+            "name": "mean_gco2_kwh",
+            "type": "integer",
+            "unit": "gCO2/kWh"
+          }
+        ]
+      }
+    }
+  ]
+}

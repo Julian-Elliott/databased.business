@@ -1,0 +1,5 @@
+{"id":"ds-004","order":4,"title":"Supplier half-hourly consumption","summary":"Gas and electricity import from the supplier’s smart-meter feed, aggregated to daily so occupancy isn’t readable.","status":"sanitising","coverage":"[dates]","cadence":"daily","licence":"[TBD]",
+"kv":[["Period","[dates]"],["Cadence","daily"],["Licence","[TBD]"]],
+"noRelease":"No public release yet · daily aggregation pending",
+"limits":[["Aggregated on purpose","Half-hourly consumption shows when a house is empty. The release is daily totals only."],["Identifiers","Account and meter-point identifiers in the source URLs are stripped before any file is built."]],
+"revisions":[["[date]","v1 · first release."]]}
