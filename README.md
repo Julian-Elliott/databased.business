@@ -1,4 +1,4 @@
-# databased.business — datasets, published as datasheets
+# databased.business · datasets, published as datasheets
 
 > Data, based in reality.
 
