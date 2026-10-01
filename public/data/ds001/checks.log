@@ -1,3 +1,7 @@
+run 2026-10-01T07:00:40Z · commit e8f46ec · backfill 2018-05-11→2026-10-01
+national: {'files': 17, 'rows': 146942, 'forecast_nulls': 43, 'first': '2018-05-10T23:30:00+00:00', 'last': '2026-09-30T23:30:00+00:00', 'period_gaps': 5}
+regional: {'files': 17, 'rows': 2620854, 'forecast_nulls': 0, 'first': '2018-05-10T23:30:00+00:00', 'last': '2026-09-30T23:30:00+00:00', 'period_gaps': 14}
+---
 built 2026-09-30T23:13:52Z
 sample_days.parquet: 192 rows, 4 day-series (sw/gb × 2026-09-29/30); forecast range 18–386 g/kWh; national actual nulls 6 (periods not yet published at fetch time)
 national_daily_means.parquet: 358 rows 2025-10-01→2026-09-29; mean 123.9, min 46, max 264; missing days (30-day fetch windows skip month-end 31sts): 2025-10-30→2025-11-01, 2025-12-30→2026-01-01, 2026-01-30→2026-02-01, 2026-05-30→2026-06-01, 2026-07-30→2026-08-01, 2026-08-30→2026-09-01

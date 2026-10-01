@@ -93,6 +93,1862 @@
           }
         ]
       }
+    },
+    {
+      "name": "national_2018",
+      "path": "national/2018.parquet",
+      "format": "parquet",
+      "bytes": 128572,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2018",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2019",
+      "path": "national/2019.parquet",
+      "format": "parquet",
+      "bytes": 201934,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2019",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2020",
+      "path": "national/2020.parquet",
+      "format": "parquet",
+      "bytes": 201524,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2020",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2021",
+      "path": "national/2021.parquet",
+      "format": "parquet",
+      "bytes": 201169,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2021",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2022",
+      "path": "national/2022.parquet",
+      "format": "parquet",
+      "bytes": 201630,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2022",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2023",
+      "path": "national/2023.parquet",
+      "format": "parquet",
+      "bytes": 200196,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2023",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2024",
+      "path": "national/2024.parquet",
+      "format": "parquet",
+      "bytes": 205435,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2024",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2025",
+      "path": "national/2025.parquet",
+      "format": "parquet",
+      "bytes": 200967,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2025",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-01",
+      "path": "national/2026-01.parquet",
+      "format": "parquet",
+      "bytes": 18464,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-01",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-02",
+      "path": "national/2026-02.parquet",
+      "format": "parquet",
+      "bytes": 16826,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-02",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-03",
+      "path": "national/2026-03.parquet",
+      "format": "parquet",
+      "bytes": 18416,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-03",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-04",
+      "path": "national/2026-04.parquet",
+      "format": "parquet",
+      "bytes": 17638,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-04",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-05",
+      "path": "national/2026-05.parquet",
+      "format": "parquet",
+      "bytes": 18180,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-05",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-06",
+      "path": "national/2026-06.parquet",
+      "format": "parquet",
+      "bytes": 17901,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-06",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-07",
+      "path": "national/2026-07.parquet",
+      "format": "parquet",
+      "bytes": 18361,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-07",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-08",
+      "path": "national/2026-08.parquet",
+      "format": "parquet",
+      "bytes": 18351,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-08",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "national_2026-09",
+      "path": "national/2026-09.parquet",
+      "format": "parquet",
+      "bytes": 17757,
+      "description": "National half-hourly intensity: forecast, actual (where published) and index.",
+      "partition": "2026-09",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_actual",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2018",
+      "path": "regional/2018.parquet",
+      "format": "parquet",
+      "bytes": 1867436,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2018",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2019",
+      "path": "regional/2019.parquet",
+      "format": "parquet",
+      "bytes": 2836305,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2019",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2020",
+      "path": "regional/2020.parquet",
+      "format": "parquet",
+      "bytes": 2921232,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2020",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2021",
+      "path": "regional/2021.parquet",
+      "format": "parquet",
+      "bytes": 2916388,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2021",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2022",
+      "path": "regional/2022.parquet",
+      "format": "parquet",
+      "bytes": 2922665,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2022",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2023",
+      "path": "regional/2023.parquet",
+      "format": "parquet",
+      "bytes": 2880870,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2023",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2024",
+      "path": "regional/2024.parquet",
+      "format": "parquet",
+      "bytes": 2952777,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2024",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2025",
+      "path": "regional/2025.parquet",
+      "format": "parquet",
+      "bytes": 2666329,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2025",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-01",
+      "path": "regional/2026-01.parquet",
+      "format": "parquet",
+      "bytes": 225173,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-01",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-02",
+      "path": "regional/2026-02.parquet",
+      "format": "parquet",
+      "bytes": 210519,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-02",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-03",
+      "path": "regional/2026-03.parquet",
+      "format": "parquet",
+      "bytes": 234357,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-03",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-04",
+      "path": "regional/2026-04.parquet",
+      "format": "parquet",
+      "bytes": 235758,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-04",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-05",
+      "path": "regional/2026-05.parquet",
+      "format": "parquet",
+      "bytes": 244194,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-05",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-06",
+      "path": "regional/2026-06.parquet",
+      "format": "parquet",
+      "bytes": 238718,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-06",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-07",
+      "path": "regional/2026-07.parquet",
+      "format": "parquet",
+      "bytes": 248401,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-07",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-08",
+      "path": "regional/2026-08.parquet",
+      "format": "parquet",
+      "bytes": 244152,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-08",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
+    },
+    {
+      "name": "regional_2026-09",
+      "path": "regional/2026-09.parquet",
+      "format": "parquet",
+      "bytes": 225857,
+      "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
+      "partition": "2026-09",
+      "schema": {
+        "fields": [
+          {
+            "name": "from",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "to",
+            "type": "timestamp[s, tz=UTC]"
+          },
+          {
+            "name": "regionid",
+            "type": "int16"
+          },
+          {
+            "name": "shortname",
+            "type": "string"
+          },
+          {
+            "name": "dnoregion",
+            "type": "string"
+          },
+          {
+            "name": "intensity_forecast",
+            "type": "int32"
+          },
+          {
+            "name": "intensity_index",
+            "type": "string"
+          },
+          {
+            "name": "mix_biomass",
+            "type": "float"
+          },
+          {
+            "name": "mix_coal",
+            "type": "float"
+          },
+          {
+            "name": "mix_imports",
+            "type": "float"
+          },
+          {
+            "name": "mix_gas",
+            "type": "float"
+          },
+          {
+            "name": "mix_nuclear",
+            "type": "float"
+          },
+          {
+            "name": "mix_other",
+            "type": "float"
+          },
+          {
+            "name": "mix_hydro",
+            "type": "float"
+          },
+          {
+            "name": "mix_solar",
+            "type": "float"
+          },
+          {
+            "name": "mix_wind",
+            "type": "float"
+          }
+        ]
+      }
     }
-  ]
+  ],
+  "updated": "2026-10-01T07:00:40Z",
+  "checks": {
+    "national": {
+      "files": 17,
+      "rows": 146942,
+      "forecast_nulls": 43,
+      "first": "2018-05-10T23:30:00+00:00",
+      "last": "2026-09-30T23:30:00+00:00",
+      "period_gaps": 5
+    },
+    "regional": {
+      "files": 17,
+      "rows": 2620854,
+      "forecast_nulls": 0,
+      "first": "2018-05-10T23:30:00+00:00",
+      "last": "2026-09-30T23:30:00+00:00",
+      "period_gaps": 14
+    },
+    "commit": "e8f46ec"
+  }
 }
