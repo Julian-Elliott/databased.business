@@ -31,7 +31,7 @@ src/components/Explorer.astro   DuckDB-WASM query panel; nothing leaves the brow
 ## DS-001 pipeline
 
 `.github/workflows/data.yml` runs `scripts/fetch_neso.py` daily. The first run backfills from 11 May 2018
-(about 440 API calls, 14-day windows) and commits yearly partitions plus monthly ones for the current year;
+(about 880 API calls, 7-day windows) and commits yearly partitions plus monthly ones for the current year;
 later runs refetch only the current partition. Partitions are small on purpose: git-friendly, and DuckDB-WASM
 loads only what a query needs. If the data ever outgrows the repository, point the workflow at an R2 bucket
 and keep the same paths.

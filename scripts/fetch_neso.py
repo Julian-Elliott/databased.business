@@ -2,7 +2,7 @@
 """DS-001 pipeline: fetch NESO carbon intensity (national + 17 regions with generation mix) and write
 Parquet partitions, a Frictionless datapackage.json, a checks log and the summary the datasheet reads.
 
-  Backfill (first run, ~440 API calls, 14-day windows):   python3 scripts/fetch_neso.py --out public/data/ds001
+  Backfill (first run, ~880 API calls, 7-day windows):   python3 scripts/fetch_neso.py --out public/data/ds001
   Daily (refetch the last 3 days, rewrite this month):     python3 scripts/fetch_neso.py --out public/data/ds001 --daily
 
 Partitions (small files, git-friendly, DuckDB-WASM friendly):
@@ -18,7 +18,7 @@ import pyarrow as pa, pyarrow.parquet as pq
 
 API = "https://api.carbonintensity.org.uk"
 FUELS = ["biomass", "coal", "imports", "gas", "nuclear", "other", "hydro", "solar", "wind"]
-WINDOW = dt.timedelta(days=14)
+WINDOW = dt.timedelta(days=7)  # the regional endpoint rejects 14-day windows; 7 works for both
 FIRST_DAY = dt.date(2018, 5, 11)  # earliest period the API serves
 
 NATIONAL_SCHEMA = pa.schema([
@@ -152,28 +152,30 @@ def main():
         log(f"  wrote {p1.name}: {c1} national rows, {c2} regional rows")
         nat_buf, reg_buf = [], []
 
-    while a < until:
-        b = min(a + WINDOW, until)
-        key = partition_key(a, today)
-        if cur_key is not None and key != cur_key:
-            flush(cur_key)
-        cur_key = key
-        nrows, rrows = fetch_window(a, b)
-        # a window can straddle a partition boundary; route rows by their own timestamp
-        for r in nrows:
-            k = partition_key(r["from"].date(), today)
-            if k == cur_key:
+    try:
+        while a < until:
+            b = min(a + WINDOW, until)
+            key = partition_key(a, today)
+            if cur_key is not None and key != cur_key:
+                flush(cur_key)
+            cur_key = key
+            nrows, rrows = fetch_window(a, b)
+            # the API includes the period containing `from`, so a window can hold a row from the previous
+            # partition; route rows by their own timestamp (write_partition de-duplicates on merge)
+            for r in nrows:
+                k = partition_key(r["from"].date(), today)
+                if k != cur_key:
+                    flush(cur_key); cur_key = k
                 nat_buf.append(r)
-            else:
-                flush(cur_key); cur_key = k; nat_buf.append(r)
-        for r in rrows:
-            k = partition_key(r["from"].date(), today)
-            if k != cur_key:
-                flush(cur_key); cur_key = k
-            reg_buf.append(r)
-        log(f"{a} → {b}: {len(nrows)} national, {len(rrows)} regional rows")
-        a = b
-    flush(cur_key)
+            for r in rrows:
+                k = partition_key(r["from"].date(), today)
+                if k != cur_key:
+                    flush(cur_key); cur_key = k
+                reg_buf.append(r)
+            log(f"{a} → {b}: {len(nrows)} national, {len(rrows)} regional rows")
+            a = b
+    finally:
+        flush(cur_key)  # keep partial progress on failure; the next run resumes from the last partition
 
     # ---- checks, summary, manifest ----
     nat = checks_for(out, "national")
