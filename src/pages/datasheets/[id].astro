@@ -23,7 +23,7 @@ const id = sheet.id.toUpperCase();
 const specsLeft: [string, string][] = [['Source', sheet.source ? `${sheet.source}${sheet.sourceUrl ? ` (${sheet.sourceUrl.replace('https://', '')})` : ''}` : '—'], ['Licence', sheet.licence || '—'], ['Coverage', sheet.coverage || '—'], ['Cadence', sheet.cadence || '—'], ['Units', sheet.units || '—']];
 const specsRight: [string, string][] = [['Formats', sheet.formats || '—'], ['Refresh', sheet.refresh || '—'], ['Revision', sheet.revision || '—'], ['Status', sheet.status]];
 ---
-<Base title={`${id} · ${sheet.title} — databased.business`} description={sheet.summary}>
+<Base title={`${id} · ${sheet.title} · databased.business`} description={sheet.summary}>
 <div class="wrap sheetwrap">
   <article class="dsheet" aria-labelledby="dst">
     <div class="rh"><span class="mono">databased.business · Datasheet</span><span class="mono">{id}{sheet.revision ? ` · Rev ${sheet.revision}` : ''}</span></div>
