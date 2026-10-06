@@ -642,7 +642,7 @@
       "name": "national_2026-10",
       "path": "national/2026-10.parquet",
       "format": "parquet",
-      "bytes": 4202,
+      "bytes": 4752,
       "description": "National half-hourly intensity: forecast, actual (where published) and index.",
       "partition": "2026-10",
       "schema": {
@@ -1966,7 +1966,7 @@
       "name": "regional_2026-10",
       "path": "regional/2026-10.parquet",
       "format": "parquet",
-      "bytes": 42608,
+      "bytes": 49749,
       "description": "Regional half-hourly forecast intensity and generation mix for 17 DNO regions.",
       "partition": "2026-10",
       "schema": {
@@ -2039,24 +2039,24 @@
       }
     }
   ],
-  "updated": "2026-10-05T06:59:13Z",
+  "updated": "2026-10-06T06:43:22Z",
   "checks": {
     "national": {
       "files": 18,
-      "rows": 147134,
+      "rows": 147182,
       "forecast_nulls": 43,
       "first": "2018-05-10T23:30:00+00:00",
-      "last": "2026-10-04T23:30:00+00:00",
+      "last": "2026-10-05T23:30:00+00:00",
       "period_gaps": 5
     },
     "regional": {
       "files": 18,
-      "rows": 2624310,
+      "rows": 2625174,
       "forecast_nulls": 0,
       "first": "2018-05-10T23:30:00+00:00",
-      "last": "2026-10-04T23:30:00+00:00",
+      "last": "2026-10-05T23:30:00+00:00",
       "period_gaps": 14
     },
-    "commit": "950a1c1"
+    "commit": "9fd2981"
   }
 }
