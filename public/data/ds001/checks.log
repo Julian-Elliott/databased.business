@@ -1,3 +1,7 @@
+run 2026-10-21T06:40:12Z · commit 7498683 · backfill 2026-10-01→2026-10-21
+national: {'files': 18, 'rows': 147902, 'forecast_nulls': 43, 'first': '2018-05-10T23:30:00+00:00', 'last': '2026-10-20T23:30:00+00:00', 'period_gaps': 5}
+regional: {'files': 18, 'rows': 2638134, 'forecast_nulls': 0, 'first': '2018-05-10T23:30:00+00:00', 'last': '2026-10-20T23:30:00+00:00', 'period_gaps': 14}
+---
 run 2026-10-20T06:39:26Z · commit 58f00cd · backfill 2026-10-01→2026-10-20
 national: {'files': 18, 'rows': 147854, 'forecast_nulls': 43, 'first': '2018-05-10T23:30:00+00:00', 'last': '2026-10-19T23:30:00+00:00', 'period_gaps': 5}
 regional: {'files': 18, 'rows': 2637270, 'forecast_nulls': 0, 'first': '2018-05-10T23:30:00+00:00', 'last': '2026-10-19T23:30:00+00:00', 'period_gaps': 14}
